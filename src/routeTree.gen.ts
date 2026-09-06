@@ -11,7 +11,16 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessRouteRouteImport } from './routes/business/route'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
+import { Route as BusinessAppRouteRouteImport } from './routes/business/_app/route'
+import { Route as BusinessLoginRouteImport } from './routes/business/login'
+import { Route as BusinessPendingRouteImport } from './routes/business/pending'
+import { Route as BusinessRegisterRouteImport } from './routes/business/register'
+import { Route as BusinessAppBorrowersRouteImport } from './routes/business/_app/borrowers'
+import { Route as BusinessAppCapitalRouteImport } from './routes/business/_app/capital'
+import { Route as BusinessAppDashboardRouteImport } from './routes/business/_app/dashboard'
+import { Route as BusinessAppLoansRouteImport } from './routes/business/_app/loans'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,38 +32,142 @@ const BusinessRouteRoute = BusinessRouteRouteImport.update({
   path: '/business',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => BusinessRouteRoute,
 } as any)
+const BusinessAppRouteRoute = BusinessAppRouteRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessLoginRoute = BusinessLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessPendingRoute = BusinessPendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessAppBorrowersRoute = BusinessAppBorrowersRouteImport.update({
+  id: '/borrowers',
+  path: '/borrowers',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
+const BusinessAppCapitalRoute = BusinessAppCapitalRouteImport.update({
+  id: '/capital',
+  path: '/capital',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
+const BusinessAppDashboardRoute = BusinessAppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
+const BusinessAppLoansRoute = BusinessAppLoansRouteImport.update({
+  id: '/loans',
+  path: '/loans',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/business': typeof BusinessRouteRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
+  '/business/login': typeof BusinessLoginRoute
+  '/business/pending': typeof BusinessPendingRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
+  '/business/borrowers': typeof BusinessAppBorrowersRoute
+  '/business/capital': typeof BusinessAppCapitalRoute
+  '/business/dashboard': typeof BusinessAppDashboardRoute
+  '/business/loans': typeof BusinessAppLoansRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
   '/business': typeof BusinessIndexRoute
+  '/business/login': typeof BusinessLoginRoute
+  '/business/pending': typeof BusinessPendingRoute
+  '/business/register': typeof BusinessRegisterRoute
+  '/business/borrowers': typeof BusinessAppBorrowersRoute
+  '/business/capital': typeof BusinessAppCapitalRoute
+  '/business/dashboard': typeof BusinessAppDashboardRoute
+  '/business/loans': typeof BusinessAppLoansRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/business': typeof BusinessRouteRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
+  '/business/_app': typeof BusinessAppRouteRouteWithChildren
+  '/business/login': typeof BusinessLoginRoute
+  '/business/pending': typeof BusinessPendingRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
+  '/business/_app/borrowers': typeof BusinessAppBorrowersRoute
+  '/business/_app/capital': typeof BusinessAppCapitalRoute
+  '/business/_app/dashboard': typeof BusinessAppDashboardRoute
+  '/business/_app/loans': typeof BusinessAppLoansRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/business' | '/business/'
+  fullPaths:
+    | '/'
+    | '/business'
+    | '/reset-password'
+    | '/business/login'
+    | '/business/pending'
+    | '/business/register'
+    | '/business/'
+    | '/business/borrowers'
+    | '/business/capital'
+    | '/business/dashboard'
+    | '/business/loans'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/business'
-  id: '__root__' | '/' | '/business' | '/business/'
+  to:
+    | '/'
+    | '/reset-password'
+    | '/business'
+    | '/business/login'
+    | '/business/pending'
+    | '/business/register'
+    | '/business/borrowers'
+    | '/business/capital'
+    | '/business/dashboard'
+    | '/business/loans'
+  id:
+    | '__root__'
+    | '/'
+    | '/business'
+    | '/reset-password'
+    | '/business/_app'
+    | '/business/login'
+    | '/business/pending'
+    | '/business/register'
+    | '/business/'
+    | '/business/_app/borrowers'
+    | '/business/_app/capital'
+    | '/business/_app/dashboard'
+    | '/business/_app/loans'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BusinessRouteRoute: typeof BusinessRouteRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -73,6 +186,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/': {
       id: '/business/'
       path: '/'
@@ -80,14 +200,95 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessIndexRouteImport
       parentRoute: typeof BusinessRouteRoute
     }
+    '/business/_app': {
+      id: '/business/_app'
+      path: ''
+      fullPath: '/business'
+      preLoaderRoute: typeof BusinessAppRouteRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
+    '/business/login': {
+      id: '/business/login'
+      path: '/login'
+      fullPath: '/business/login'
+      preLoaderRoute: typeof BusinessLoginRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
+    '/business/pending': {
+      id: '/business/pending'
+      path: '/pending'
+      fullPath: '/business/pending'
+      preLoaderRoute: typeof BusinessPendingRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
+    '/business/register': {
+      id: '/business/register'
+      path: '/register'
+      fullPath: '/business/register'
+      preLoaderRoute: typeof BusinessRegisterRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
+    '/business/_app/borrowers': {
+      id: '/business/_app/borrowers'
+      path: '/borrowers'
+      fullPath: '/business/borrowers'
+      preLoaderRoute: typeof BusinessAppBorrowersRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
+    '/business/_app/capital': {
+      id: '/business/_app/capital'
+      path: '/capital'
+      fullPath: '/business/capital'
+      preLoaderRoute: typeof BusinessAppCapitalRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
+    '/business/_app/dashboard': {
+      id: '/business/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/business/dashboard'
+      preLoaderRoute: typeof BusinessAppDashboardRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
+    '/business/_app/loans': {
+      id: '/business/_app/loans'
+      path: '/loans'
+      fullPath: '/business/loans'
+      preLoaderRoute: typeof BusinessAppLoansRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
   }
 }
 
+interface BusinessAppRouteRouteChildren {
+  BusinessAppBorrowersRoute: typeof BusinessAppBorrowersRoute
+  BusinessAppCapitalRoute: typeof BusinessAppCapitalRoute
+  BusinessAppDashboardRoute: typeof BusinessAppDashboardRoute
+  BusinessAppLoansRoute: typeof BusinessAppLoansRoute
+}
+
+const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
+  BusinessAppBorrowersRoute: BusinessAppBorrowersRoute,
+  BusinessAppCapitalRoute: BusinessAppCapitalRoute,
+  BusinessAppDashboardRoute: BusinessAppDashboardRoute,
+  BusinessAppLoansRoute: BusinessAppLoansRoute,
+}
+
+const BusinessAppRouteRouteWithChildren =
+  BusinessAppRouteRoute._addFileChildren(BusinessAppRouteRouteChildren)
+
 interface BusinessRouteRouteChildren {
+  BusinessAppRouteRoute: typeof BusinessAppRouteRouteWithChildren
+  BusinessLoginRoute: typeof BusinessLoginRoute
+  BusinessPendingRoute: typeof BusinessPendingRoute
+  BusinessRegisterRoute: typeof BusinessRegisterRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
 }
 
 const BusinessRouteRouteChildren: BusinessRouteRouteChildren = {
+  BusinessAppRouteRoute: BusinessAppRouteRouteWithChildren,
+  BusinessLoginRoute: BusinessLoginRoute,
+  BusinessPendingRoute: BusinessPendingRoute,
+  BusinessRegisterRoute: BusinessRegisterRoute,
   BusinessIndexRoute: BusinessIndexRoute,
 }
 
@@ -98,6 +299,7 @@ const BusinessRouteRouteWithChildren = BusinessRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BusinessRouteRoute: BusinessRouteRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
