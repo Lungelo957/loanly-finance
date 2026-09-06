@@ -11,7 +11,11 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessRouteRouteImport } from './routes/business/route'
+import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
+import { Route as BusinessLoginRouteImport } from './routes/business/login'
+import { Route as BusinessPendingRouteImport } from './routes/business/pending'
+import { Route as BusinessRegisterRouteImport } from './routes/business/register'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -23,38 +27,92 @@ const BusinessRouteRoute = BusinessRouteRouteImport.update({
   path: '/business',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ResetPasswordRoute = ResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessLoginRoute = BusinessLoginRouteImport.update({
+  id: '/login',
+  path: '/login',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessPendingRoute = BusinessPendingRouteImport.update({
+  id: '/pending',
+  path: '/pending',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
+  id: '/register',
+  path: '/register',
   getParentRoute: () => BusinessRouteRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/business': typeof BusinessRouteRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
+  '/business/login': typeof BusinessLoginRoute
+  '/business/pending': typeof BusinessPendingRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/reset-password': typeof ResetPasswordRoute
+  '/business/login': typeof BusinessLoginRoute
+  '/business/pending': typeof BusinessPendingRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business': typeof BusinessIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/business': typeof BusinessRouteRouteWithChildren
+  '/reset-password': typeof ResetPasswordRoute
+  '/business/login': typeof BusinessLoginRoute
+  '/business/pending': typeof BusinessPendingRoute
+  '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/business' | '/business/'
+  fullPaths:
+    | '/'
+    | '/business'
+    | '/reset-password'
+    | '/business/login'
+    | '/business/pending'
+    | '/business/register'
+    | '/business/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/business'
-  id: '__root__' | '/' | '/business' | '/business/'
+  to:
+    | '/'
+    | '/reset-password'
+    | '/business/login'
+    | '/business/pending'
+    | '/business/register'
+    | '/business'
+  id:
+    | '__root__'
+    | '/'
+    | '/business'
+    | '/reset-password'
+    | '/business/login'
+    | '/business/pending'
+    | '/business/register'
+    | '/business/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   BusinessRouteRoute: typeof BusinessRouteRouteWithChildren
+  ResetPasswordRoute: typeof ResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -73,6 +131,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/reset-password': {
+      id: '/reset-password'
+      path: '/reset-password'
+      fullPath: '/reset-password'
+      preLoaderRoute: typeof ResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/business/': {
       id: '/business/'
       path: '/'
@@ -80,14 +145,41 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessIndexRouteImport
       parentRoute: typeof BusinessRouteRoute
     }
+    '/business/login': {
+      id: '/business/login'
+      path: '/login'
+      fullPath: '/business/login'
+      preLoaderRoute: typeof BusinessLoginRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
+    '/business/pending': {
+      id: '/business/pending'
+      path: '/pending'
+      fullPath: '/business/pending'
+      preLoaderRoute: typeof BusinessPendingRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
+    '/business/register': {
+      id: '/business/register'
+      path: '/register'
+      fullPath: '/business/register'
+      preLoaderRoute: typeof BusinessRegisterRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
   }
 }
 
 interface BusinessRouteRouteChildren {
+  BusinessLoginRoute: typeof BusinessLoginRoute
+  BusinessPendingRoute: typeof BusinessPendingRoute
+  BusinessRegisterRoute: typeof BusinessRegisterRoute
   BusinessIndexRoute: typeof BusinessIndexRoute
 }
 
 const BusinessRouteRouteChildren: BusinessRouteRouteChildren = {
+  BusinessLoginRoute: BusinessLoginRoute,
+  BusinessPendingRoute: BusinessPendingRoute,
+  BusinessRegisterRoute: BusinessRegisterRoute,
   BusinessIndexRoute: BusinessIndexRoute,
 }
 
@@ -98,6 +190,7 @@ const BusinessRouteRouteWithChildren = BusinessRouteRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   BusinessRouteRoute: BusinessRouteRouteWithChildren,
+  ResetPasswordRoute: ResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
