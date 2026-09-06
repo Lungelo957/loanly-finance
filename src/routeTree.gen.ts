@@ -17,6 +17,8 @@ import { Route as BusinessAppRouteRouteImport } from './routes/business/_app/rou
 import { Route as BusinessLoginRouteImport } from './routes/business/login'
 import { Route as BusinessPendingRouteImport } from './routes/business/pending'
 import { Route as BusinessRegisterRouteImport } from './routes/business/register'
+import { Route as BusinessAppCapitalRouteImport } from './routes/business/_app/capital'
+import { Route as BusinessAppDashboardRouteImport } from './routes/business/_app/dashboard'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -57,6 +59,16 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => BusinessRouteRoute,
 } as any)
+const BusinessAppCapitalRoute = BusinessAppCapitalRouteImport.update({
+  id: '/capital',
+  path: '/capital',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
+const BusinessAppDashboardRoute = BusinessAppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -66,6 +78,8 @@ export interface FileRoutesByFullPath {
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
+  '/business/capital': typeof BusinessAppCapitalRoute
+  '/business/dashboard': typeof BusinessAppDashboardRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -74,17 +88,21 @@ export interface FileRoutesByTo {
   '/business/login': typeof BusinessLoginRoute
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
+  '/business/capital': typeof BusinessAppCapitalRoute
+  '/business/dashboard': typeof BusinessAppDashboardRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/business': typeof BusinessRouteRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
-  '/business/_app': typeof BusinessAppRouteRoute
+  '/business/_app': typeof BusinessAppRouteRouteWithChildren
   '/business/login': typeof BusinessLoginRoute
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
+  '/business/_app/capital': typeof BusinessAppCapitalRoute
+  '/business/_app/dashboard': typeof BusinessAppDashboardRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -96,6 +114,8 @@ export interface FileRouteTypes {
     | '/business/pending'
     | '/business/register'
     | '/business/'
+    | '/business/capital'
+    | '/business/dashboard'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -104,6 +124,8 @@ export interface FileRouteTypes {
     | '/business/login'
     | '/business/pending'
     | '/business/register'
+    | '/business/capital'
+    | '/business/dashboard'
   id:
     | '__root__'
     | '/'
@@ -114,6 +136,8 @@ export interface FileRouteTypes {
     | '/business/pending'
     | '/business/register'
     | '/business/'
+    | '/business/_app/capital'
+    | '/business/_app/dashboard'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -180,11 +204,38 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRegisterRouteImport
       parentRoute: typeof BusinessRouteRoute
     }
+    '/business/_app/capital': {
+      id: '/business/_app/capital'
+      path: '/capital'
+      fullPath: '/business/capital'
+      preLoaderRoute: typeof BusinessAppCapitalRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
+    '/business/_app/dashboard': {
+      id: '/business/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/business/dashboard'
+      preLoaderRoute: typeof BusinessAppDashboardRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
   }
 }
 
+interface BusinessAppRouteRouteChildren {
+  BusinessAppCapitalRoute: typeof BusinessAppCapitalRoute
+  BusinessAppDashboardRoute: typeof BusinessAppDashboardRoute
+}
+
+const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
+  BusinessAppCapitalRoute: BusinessAppCapitalRoute,
+  BusinessAppDashboardRoute: BusinessAppDashboardRoute,
+}
+
+const BusinessAppRouteRouteWithChildren =
+  BusinessAppRouteRoute._addFileChildren(BusinessAppRouteRouteChildren)
+
 interface BusinessRouteRouteChildren {
-  BusinessAppRouteRoute: typeof BusinessAppRouteRoute
+  BusinessAppRouteRoute: typeof BusinessAppRouteRouteWithChildren
   BusinessLoginRoute: typeof BusinessLoginRoute
   BusinessPendingRoute: typeof BusinessPendingRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
@@ -192,7 +243,7 @@ interface BusinessRouteRouteChildren {
 }
 
 const BusinessRouteRouteChildren: BusinessRouteRouteChildren = {
-  BusinessAppRouteRoute: BusinessAppRouteRoute,
+  BusinessAppRouteRoute: BusinessAppRouteRouteWithChildren,
   BusinessLoginRoute: BusinessLoginRoute,
   BusinessPendingRoute: BusinessPendingRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
