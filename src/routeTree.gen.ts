@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as BusinessRouteRouteImport } from './routes/business/route'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as BusinessIndexRouteImport } from './routes/business/index'
+import { Route as BusinessAppRouteRouteImport } from './routes/business/_app/route'
 import { Route as BusinessLoginRouteImport } from './routes/business/login'
 import { Route as BusinessPendingRouteImport } from './routes/business/pending'
 import { Route as BusinessRegisterRouteImport } from './routes/business/register'
@@ -35,6 +36,10 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const BusinessIndexRoute = BusinessIndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => BusinessRouteRoute,
+} as any)
+const BusinessAppRouteRoute = BusinessAppRouteRouteImport.update({
+  id: '/_app',
   getParentRoute: () => BusinessRouteRoute,
 } as any)
 const BusinessLoginRoute = BusinessLoginRouteImport.update({
@@ -65,16 +70,17 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/reset-password': typeof ResetPasswordRoute
+  '/business': typeof BusinessIndexRoute
   '/business/login': typeof BusinessLoginRoute
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
-  '/business': typeof BusinessIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/business': typeof BusinessRouteRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
+  '/business/_app': typeof BusinessAppRouteRoute
   '/business/login': typeof BusinessLoginRoute
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
@@ -94,15 +100,16 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/reset-password'
+    | '/business'
     | '/business/login'
     | '/business/pending'
     | '/business/register'
-    | '/business'
   id:
     | '__root__'
     | '/'
     | '/business'
     | '/reset-password'
+    | '/business/_app'
     | '/business/login'
     | '/business/pending'
     | '/business/register'
@@ -145,6 +152,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessIndexRouteImport
       parentRoute: typeof BusinessRouteRoute
     }
+    '/business/_app': {
+      id: '/business/_app'
+      path: ''
+      fullPath: '/business'
+      preLoaderRoute: typeof BusinessAppRouteRouteImport
+      parentRoute: typeof BusinessRouteRoute
+    }
     '/business/login': {
       id: '/business/login'
       path: '/login'
@@ -170,6 +184,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface BusinessRouteRouteChildren {
+  BusinessAppRouteRoute: typeof BusinessAppRouteRoute
   BusinessLoginRoute: typeof BusinessLoginRoute
   BusinessPendingRoute: typeof BusinessPendingRoute
   BusinessRegisterRoute: typeof BusinessRegisterRoute
@@ -177,6 +192,7 @@ interface BusinessRouteRouteChildren {
 }
 
 const BusinessRouteRouteChildren: BusinessRouteRouteChildren = {
+  BusinessAppRouteRoute: BusinessAppRouteRoute,
   BusinessLoginRoute: BusinessLoginRoute,
   BusinessPendingRoute: BusinessPendingRoute,
   BusinessRegisterRoute: BusinessRegisterRoute,
