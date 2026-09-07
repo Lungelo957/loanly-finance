@@ -17,6 +17,7 @@ import { Route as BusinessAppRouteRouteImport } from './routes/business/_app/rou
 import { Route as BusinessLoginRouteImport } from './routes/business/login'
 import { Route as BusinessPendingRouteImport } from './routes/business/pending'
 import { Route as BusinessRegisterRouteImport } from './routes/business/register'
+import { Route as BusinessAppAgreementsRouteImport } from './routes/business/_app/agreements'
 import { Route as BusinessAppBorrowersRouteImport } from './routes/business/_app/borrowers'
 import { Route as BusinessAppCapitalRouteImport } from './routes/business/_app/capital'
 import { Route as BusinessAppCollectionsRouteImport } from './routes/business/_app/collections'
@@ -24,6 +25,8 @@ import { Route as BusinessAppDashboardRouteImport } from './routes/business/_app
 import { Route as BusinessAppExpensesRouteImport } from './routes/business/_app/expenses'
 import { Route as BusinessAppLoansRouteImport } from './routes/business/_app/loans'
 import { Route as BusinessAppPaymentsRouteImport } from './routes/business/_app/payments'
+import { Route as BusinessAppReportsRouteImport } from './routes/business/_app/reports'
+import { Route as BusinessAppSupportRouteImport } from './routes/business/_app/support'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -64,6 +67,11 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => BusinessRouteRoute,
 } as any)
+const BusinessAppAgreementsRoute = BusinessAppAgreementsRouteImport.update({
+  id: '/agreements',
+  path: '/agreements',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
 const BusinessAppBorrowersRoute = BusinessAppBorrowersRouteImport.update({
   id: '/borrowers',
   path: '/borrowers',
@@ -99,6 +107,16 @@ const BusinessAppPaymentsRoute = BusinessAppPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => BusinessAppRouteRoute,
 } as any)
+const BusinessAppReportsRoute = BusinessAppReportsRouteImport.update({
+  id: '/reports',
+  path: '/reports',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
+const BusinessAppSupportRoute = BusinessAppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -108,6 +126,7 @@ export interface FileRoutesByFullPath {
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
+  '/business/agreements': typeof BusinessAppAgreementsRoute
   '/business/borrowers': typeof BusinessAppBorrowersRoute
   '/business/capital': typeof BusinessAppCapitalRoute
   '/business/collections': typeof BusinessAppCollectionsRoute
@@ -115,6 +134,8 @@ export interface FileRoutesByFullPath {
   '/business/expenses': typeof BusinessAppExpensesRoute
   '/business/loans': typeof BusinessAppLoansRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
+  '/business/reports': typeof BusinessAppReportsRoute
+  '/business/support': typeof BusinessAppSupportRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -123,6 +144,7 @@ export interface FileRoutesByTo {
   '/business/login': typeof BusinessLoginRoute
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
+  '/business/agreements': typeof BusinessAppAgreementsRoute
   '/business/borrowers': typeof BusinessAppBorrowersRoute
   '/business/capital': typeof BusinessAppCapitalRoute
   '/business/collections': typeof BusinessAppCollectionsRoute
@@ -130,6 +152,8 @@ export interface FileRoutesByTo {
   '/business/expenses': typeof BusinessAppExpensesRoute
   '/business/loans': typeof BusinessAppLoansRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
+  '/business/reports': typeof BusinessAppReportsRoute
+  '/business/support': typeof BusinessAppSupportRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -141,6 +165,7 @@ export interface FileRoutesById {
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
   '/business/': typeof BusinessIndexRoute
+  '/business/_app/agreements': typeof BusinessAppAgreementsRoute
   '/business/_app/borrowers': typeof BusinessAppBorrowersRoute
   '/business/_app/capital': typeof BusinessAppCapitalRoute
   '/business/_app/collections': typeof BusinessAppCollectionsRoute
@@ -148,6 +173,8 @@ export interface FileRoutesById {
   '/business/_app/expenses': typeof BusinessAppExpensesRoute
   '/business/_app/loans': typeof BusinessAppLoansRoute
   '/business/_app/payments': typeof BusinessAppPaymentsRoute
+  '/business/_app/reports': typeof BusinessAppReportsRoute
+  '/business/_app/support': typeof BusinessAppSupportRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -159,6 +186,7 @@ export interface FileRouteTypes {
     | '/business/pending'
     | '/business/register'
     | '/business/'
+    | '/business/agreements'
     | '/business/borrowers'
     | '/business/capital'
     | '/business/collections'
@@ -166,6 +194,8 @@ export interface FileRouteTypes {
     | '/business/expenses'
     | '/business/loans'
     | '/business/payments'
+    | '/business/reports'
+    | '/business/support'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -174,6 +204,7 @@ export interface FileRouteTypes {
     | '/business/login'
     | '/business/pending'
     | '/business/register'
+    | '/business/agreements'
     | '/business/borrowers'
     | '/business/capital'
     | '/business/collections'
@@ -181,6 +212,8 @@ export interface FileRouteTypes {
     | '/business/expenses'
     | '/business/loans'
     | '/business/payments'
+    | '/business/reports'
+    | '/business/support'
   id:
     | '__root__'
     | '/'
@@ -191,6 +224,7 @@ export interface FileRouteTypes {
     | '/business/pending'
     | '/business/register'
     | '/business/'
+    | '/business/_app/agreements'
     | '/business/_app/borrowers'
     | '/business/_app/capital'
     | '/business/_app/collections'
@@ -198,6 +232,8 @@ export interface FileRouteTypes {
     | '/business/_app/expenses'
     | '/business/_app/loans'
     | '/business/_app/payments'
+    | '/business/_app/reports'
+    | '/business/_app/support'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -264,6 +300,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRegisterRouteImport
       parentRoute: typeof BusinessRouteRoute
     }
+    '/business/_app/agreements': {
+      id: '/business/_app/agreements'
+      path: '/agreements'
+      fullPath: '/business/agreements'
+      preLoaderRoute: typeof BusinessAppAgreementsRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
     '/business/_app/borrowers': {
       id: '/business/_app/borrowers'
       path: '/borrowers'
@@ -313,10 +356,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessAppPaymentsRouteImport
       parentRoute: typeof BusinessAppRouteRoute
     }
+    '/business/_app/reports': {
+      id: '/business/_app/reports'
+      path: '/reports'
+      fullPath: '/business/reports'
+      preLoaderRoute: typeof BusinessAppReportsRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
+    '/business/_app/support': {
+      id: '/business/_app/support'
+      path: '/support'
+      fullPath: '/business/support'
+      preLoaderRoute: typeof BusinessAppSupportRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
   }
 }
 
 interface BusinessAppRouteRouteChildren {
+  BusinessAppAgreementsRoute: typeof BusinessAppAgreementsRoute
   BusinessAppBorrowersRoute: typeof BusinessAppBorrowersRoute
   BusinessAppCapitalRoute: typeof BusinessAppCapitalRoute
   BusinessAppCollectionsRoute: typeof BusinessAppCollectionsRoute
@@ -324,9 +382,12 @@ interface BusinessAppRouteRouteChildren {
   BusinessAppExpensesRoute: typeof BusinessAppExpensesRoute
   BusinessAppLoansRoute: typeof BusinessAppLoansRoute
   BusinessAppPaymentsRoute: typeof BusinessAppPaymentsRoute
+  BusinessAppReportsRoute: typeof BusinessAppReportsRoute
+  BusinessAppSupportRoute: typeof BusinessAppSupportRoute
 }
 
 const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
+  BusinessAppAgreementsRoute: BusinessAppAgreementsRoute,
   BusinessAppBorrowersRoute: BusinessAppBorrowersRoute,
   BusinessAppCapitalRoute: BusinessAppCapitalRoute,
   BusinessAppCollectionsRoute: BusinessAppCollectionsRoute,
@@ -334,6 +395,8 @@ const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
   BusinessAppExpensesRoute: BusinessAppExpensesRoute,
   BusinessAppLoansRoute: BusinessAppLoansRoute,
   BusinessAppPaymentsRoute: BusinessAppPaymentsRoute,
+  BusinessAppReportsRoute: BusinessAppReportsRoute,
+  BusinessAppSupportRoute: BusinessAppSupportRoute,
 }
 
 const BusinessAppRouteRouteWithChildren =
