@@ -29,16 +29,16 @@ import {
   useRepayments,
   type LoanWithBorrower,
 } from "@/lib/business-data";
-import { buildSchedule, FREQUENCY_LABEL, type Frequency } from "@/lib/finance";
+import { computeMonthEndLoan, loanDisplayStatus, monthEndDueDate } from "@/lib/finance";
 import { formatCurrency, formatDate, todayISO } from "@/lib/format";
 
 export const Route = createFileRoute("/business/_app/loans")({
   head: () => ({
     meta: [
       { title: "Loans — CashFlow" },
-      { name: "description", content: "Create loans and follow every repayment schedule." },
+      { name: "description", content: "Issue month-end loans and follow every repayment." },
       { property: "og:title", content: "Loans — CashFlow" },
-      { property: "og:description", content: "Create loans and follow every repayment schedule." },
+      { property: "og:description", content: "Issue month-end loans and follow every repayment." },
     ],
   }),
   component: LoansPage,
@@ -46,7 +46,9 @@ export const Route = createFileRoute("/business/_app/loans")({
 
 const statusTone: Record<string, string> = {
   active: "bg-accent text-accent-foreground",
-  completed: "bg-success/15 text-success",
+  due: "bg-primary/10 text-primary",
+  overdue: "bg-destructive/10 text-destructive",
+  paid: "bg-success/15 text-success",
   defaulted: "bg-destructive/10 text-destructive",
   cancelled: "bg-muted text-muted-foreground",
 };
@@ -54,6 +56,7 @@ const statusTone: Record<string, string> = {
 function LoansPage() {
   const { data: account } = useAccount();
   const businessId = account?.business?.id;
+  const defaultRate = Number(account?.business?.default_interest_rate ?? 40);
   const invalidate = useBusinessInvalidate(businessId);
 
   const borrowers = useBorrowers(businessId);
@@ -63,27 +66,19 @@ function LoansPage() {
 
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<LoanWithBorrower | null>(null);
-  const [form, setForm] = useState({
+  const emptyForm = () => ({
     borrower_id: "",
     principal_amount: "",
-    interest_rate: "",
-    loan_term_months: "",
-    repayment_frequency: "monthly" as Frequency,
-    start_date: todayISO(),
+    interest_rate: String(defaultRate),
+    issue_date: todayISO(),
     notes: "",
   });
+  const [form, setForm] = useState(emptyForm);
 
   const preview = useMemo(() => {
     const principal = Number(form.principal_amount);
-    const term = Number(form.loan_term_months);
-    if (!principal || !term) return null;
-    return buildSchedule({
-      principal,
-      interestRate: Number(form.interest_rate) || 0,
-      termMonths: term,
-      frequency: form.repayment_frequency,
-      startDate: form.start_date,
-    });
+    if (!principal) return null;
+    return computeMonthEndLoan(principal, form.interest_rate, form.issue_date);
   }, [form]);
 
   const paidByLoan = useMemo(() => {
@@ -92,39 +87,34 @@ function LoansPage() {
     return map;
   }, [payments.data]);
 
+  const today = todayISO();
+
   const create = useMutation({
     mutationFn: async () => {
       if (!businessId) throw new Error("no-business");
       if (!form.borrower_id) throw new Error("no-borrower");
       const principal = Number(form.principal_amount);
-      const rate = Number(form.interest_rate || 0);
-      const term = Number(form.loan_term_months);
+      const rate = Number(form.interest_rate);
       if (!Number.isFinite(principal) || principal <= 0) throw new Error("bad-principal");
       if (!Number.isFinite(rate) || rate < 0) throw new Error("bad-rate");
-      if (!Number.isFinite(term) || term < 1) throw new Error("bad-term");
 
-      const schedule = buildSchedule({
-        principal,
-        interestRate: rate,
-        termMonths: term,
-        frequency: form.repayment_frequency,
-        startDate: form.start_date,
-      });
+      const calc = computeMonthEndLoan(principal, rate, form.issue_date);
 
       const { data: loan, error } = await supabase
         .from("loans")
         .insert({
           business_id: businessId,
           borrower_id: form.borrower_id,
-          principal_amount: principal,
-          interest_rate: rate,
-          loan_term_months: Math.round(term),
-          repayment_frequency: form.repayment_frequency,
-          start_date: form.start_date,
-          total_interest: schedule.totalInterest,
-          total_repayable: schedule.totalRepayable,
-          installment_amount: schedule.installmentAmount,
-          installments_count: schedule.installmentsCount,
+          principal_amount: calc.principal,
+          interest_rate: calc.interestRate,
+          loan_term_months: 1,
+          repayment_frequency: "monthly",
+          start_date: calc.issueDate,
+          due_date: calc.dueDate,
+          total_interest: calc.interestAmount,
+          total_repayable: calc.totalRepayable,
+          installment_amount: calc.totalRepayable,
+          installments_count: 1,
           notes: form.notes.trim(),
           created_by: account?.userId ?? null,
         })
@@ -132,15 +122,14 @@ function LoansPage() {
         .single();
       if (error) throw new Error(error.message);
 
-      const { error: scheduleError } = await supabase.from("loan_repayments").insert(
-        schedule.rows.map((r) => ({
-          business_id: businessId,
-          loan_id: loan.id,
-          installment_number: r.installment_number,
-          due_date: r.due_date,
-          amount_due: r.amount_due,
-        })),
-      );
+      // One single month-end repayment obligation.
+      const { error: scheduleError } = await supabase.from("loan_repayments").insert({
+        business_id: businessId,
+        loan_id: loan.id,
+        installment_number: 1,
+        due_date: calc.dueDate,
+        amount_due: calc.totalRepayable,
+      });
       if (scheduleError) {
         await supabase.from("loans").delete().eq("id", loan.id);
         throw new Error(scheduleError.message);
@@ -150,30 +139,21 @@ function LoansPage() {
         business_id: businessId,
         user_id: account?.userId ?? null,
         title: "Loan created",
-        body: `A loan of ${formatCurrency(principal)} was created.`,
+        body: `A loan of ${formatCurrency(calc.principal)} is repayable by ${formatDate(calc.dueDate)}.`,
       });
       return loan;
     },
     onSuccess: async () => {
       await invalidate();
       setOpen(false);
-      setForm({
-        borrower_id: "",
-        principal_amount: "",
-        interest_rate: "",
-        loan_term_months: "",
-        repayment_frequency: "monthly",
-        start_date: todayISO(),
-        notes: "",
-      });
-      toast.success("Loan created with its repayment schedule.");
+      setForm(emptyForm());
+      toast.success("Loan created and due at the end of the month.");
     },
     onError: (e) => {
       const map: Record<string, string> = {
         "no-borrower": "Choose a borrower first.",
         "bad-principal": "The loan amount must be greater than zero.",
         "bad-rate": "The interest rate can't be negative.",
-        "bad-term": "The loan term must be at least one month.",
       };
       toast.error(map[e.message] ?? friendlyError(e, "We couldn't create this loan."));
     },
@@ -201,9 +181,16 @@ function LoansPage() {
     <div>
       <PageHeader
         title="Loans"
-        description="Create loans and follow their repayment schedules."
+        description="Money lent this month, repayable on the last day of the month."
         action={
-          <Button size="sm" onClick={() => setOpen(true)} disabled={(borrowers.data ?? []).length === 0}>
+          <Button
+            size="sm"
+            onClick={() => {
+              setForm(emptyForm());
+              setOpen(true);
+            }}
+            disabled={(borrowers.data ?? []).length === 0}
+          >
             <Plus className="mr-1.5 h-4 w-4" /> New loan
           </Button>
         }
@@ -228,22 +215,29 @@ function LoansPage() {
         <EmptyState
           icon={<HandCoins className="h-8 w-8" />}
           title="No loans yet"
-          description="Create your first loan and CashFlow will build the repayment schedule for you."
+          description="Create your first loan and CashFlow works out the interest and month-end due date."
           action={
-            <Button size="sm" onClick={() => setOpen(true)}>
+            <Button
+              size="sm"
+              onClick={() => {
+                setForm(emptyForm());
+                setOpen(true);
+              }}
+            >
               Create loan
             </Button>
           }
         />
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[640px] border-separate border-spacing-y-2 text-sm">
+          <table className="w-full min-w-[680px] border-separate border-spacing-y-2 text-sm">
             <thead>
               <tr className="text-left text-xs uppercase tracking-wide text-muted-foreground">
                 <th className="px-4 pb-1 font-medium">Borrower</th>
                 <th className="px-4 pb-1 font-medium">Principal</th>
-                <th className="px-4 pb-1 font-medium">Repayable</th>
+                <th className="px-4 pb-1 font-medium">Total due</th>
                 <th className="px-4 pb-1 font-medium">Outstanding</th>
+                <th className="px-4 pb-1 font-medium">Due date</th>
                 <th className="px-4 pb-1 font-medium">Status</th>
                 <th className="px-4 pb-1" />
               </tr>
@@ -252,20 +246,28 @@ function LoansPage() {
               {(loans.data ?? []).map((loan) => {
                 const paid = paidByLoan.get(loan.id) ?? 0;
                 const outstanding = Math.max(0, Number(loan.total_repayable) - paid);
+                const status = loanDisplayStatus(
+                  loan.status,
+                  loan.due_date,
+                  Number(loan.total_repayable),
+                  paid,
+                  today,
+                );
                 return (
                   <tr key={loan.id} className="card-surface">
                     <td className="rounded-l-xl px-4 py-3">
                       <p className="font-medium">{loan.borrowers?.full_name ?? "—"}</p>
                       <p className="text-xs text-muted-foreground">
-                        {FREQUENCY_LABEL[loan.repayment_frequency as Frequency]} · from {formatDate(loan.start_date)}
+                        {Number(loan.interest_rate)}% · issued {formatDate(loan.start_date)}
                       </p>
                     </td>
                     <td className="px-4 py-3 tabular-nums">{formatCurrency(Number(loan.principal_amount))}</td>
                     <td className="px-4 py-3 tabular-nums">{formatCurrency(Number(loan.total_repayable))}</td>
                     <td className="px-4 py-3 font-medium tabular-nums">{formatCurrency(outstanding)}</td>
+                    <td className="px-4 py-3">{loan.due_date ? formatDate(loan.due_date) : "—"}</td>
                     <td className="px-4 py-3">
-                      <Badge className={`capitalize ${statusTone[loan.status] ?? ""}`} variant="secondary">
-                        {loan.status}
+                      <Badge className={`capitalize ${statusTone[status] ?? ""}`} variant="secondary">
+                        {status}
                       </Badge>
                     </td>
                     <td className="rounded-r-xl px-4 py-3 text-right">
@@ -313,7 +315,7 @@ function LoansPage() {
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
-                <Label htmlFor="principal">Principal amount</Label>
+                <Label htmlFor="principal">Loan amount</Label>
                 <Input
                   id="principal"
                   type="number"
@@ -325,7 +327,7 @@ function LoansPage() {
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="rate">Interest rate (% per year)</Label>
+                <Label htmlFor="rate">Interest rate (%)</Label>
                 <Input
                   id="rate"
                   type="number"
@@ -335,47 +337,23 @@ function LoansPage() {
                   onChange={(e) => setForm((f) => ({ ...f, interest_rate: e.target.value }))}
                   required
                 />
-              </div>
-            </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="term">Term (months)</Label>
-                <Input
-                  id="term"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={form.loan_term_months}
-                  onChange={(e) => setForm((f) => ({ ...f, loan_term_months: e.target.value }))}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Repayment frequency</Label>
-                <Select
-                  value={form.repayment_frequency}
-                  onValueChange={(v) => setForm((f) => ({ ...f, repayment_frequency: v as Frequency }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem value="biweekly">Every 2 weeks</SelectItem>
-                    <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Your default is {defaultRate}%. You can change it for this loan.
+                </p>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="start">Start date</Label>
+              <Label htmlFor="issue">Loan date</Label>
               <Input
-                id="start"
+                id="issue"
                 type="date"
-                value={form.start_date}
-                onChange={(e) => setForm((f) => ({ ...f, start_date: e.target.value }))}
+                value={form.issue_date}
+                onChange={(e) => setForm((f) => ({ ...f, issue_date: e.target.value }))}
                 required
               />
+              <p className="text-xs text-muted-foreground">
+                Repayable in full on {formatDate(monthEndDueDate(form.issue_date))}.
+              </p>
             </div>
             <div className="space-y-2">
               <Label htmlFor="loan_notes">Notes</Label>
@@ -388,14 +366,16 @@ function LoansPage() {
 
             {preview ? (
               <div className="rounded-xl bg-muted p-4 text-sm">
-                <p className="font-medium">Schedule preview</p>
+                <p className="font-medium">Summary</p>
                 <ul className="mt-2 space-y-1 text-muted-foreground">
-                  <li>Interest: {formatCurrency(preview.totalInterest)}</li>
-                  <li>Total repayable: {formatCurrency(preview.totalRepayable)}</li>
+                  <li>Loan amount: {formatCurrency(preview.principal)}</li>
                   <li>
-                    {preview.installmentsCount} instalments of about{" "}
-                    {formatCurrency(preview.installmentAmount)}
+                    Interest at {preview.interestRate}%: {formatCurrency(preview.interestAmount)}
                   </li>
+                  <li className="font-medium text-foreground">
+                    Total repayment: {formatCurrency(preview.totalRepayable)}
+                  </li>
+                  <li>Due: {formatDate(preview.dueDate)}</li>
                 </ul>
               </div>
             ) : null}
@@ -415,16 +395,32 @@ function LoansPage() {
           {detail ? (
             <div className="space-y-4 text-sm">
               <div className="grid grid-cols-2 gap-3">
-                <Info label="Principal" value={formatCurrency(Number(detail.principal_amount))} />
-                <Info label="Interest rate" value={`${Number(detail.interest_rate)}% p.a.`} />
-                <Info label="Total interest" value={formatCurrency(Number(detail.total_interest))} />
-                <Info label="Total repayable" value={formatCurrency(Number(detail.total_repayable))} />
-                <Info label="Instalment" value={formatCurrency(Number(detail.installment_amount))} />
-                <Info label="Instalments" value={String(detail.installments_count)} />
+                <Info label="Loan amount" value={formatCurrency(Number(detail.principal_amount))} />
+                <Info label="Interest rate" value={`${Number(detail.interest_rate)}%`} />
+                <Info label="Interest" value={formatCurrency(Number(detail.total_interest))} />
+                <Info label="Total repayment" value={formatCurrency(Number(detail.total_repayable))} />
+                <Info label="Loan date" value={formatDate(detail.start_date)} />
+                <Info label="Due date" value={detail.due_date ? formatDate(detail.due_date) : "—"} />
+                <Info
+                  label="Outstanding"
+                  value={formatCurrency(
+                    Math.max(0, Number(detail.total_repayable) - (paidByLoan.get(detail.id) ?? 0)),
+                  )}
+                />
+                <Info
+                  label="Status"
+                  value={loanDisplayStatus(
+                    detail.status,
+                    detail.due_date,
+                    Number(detail.total_repayable),
+                    paidByLoan.get(detail.id) ?? 0,
+                    today,
+                  )}
+                />
               </div>
 
               <div className="space-y-2">
-                <Label>Loan status</Label>
+                <Label>Loan record status</Label>
                 <Select
                   value={detail.status}
                   onValueChange={(v) =>
@@ -447,7 +443,7 @@ function LoansPage() {
               </div>
 
               <div>
-                <p className="mb-2 font-medium">Repayment schedule</p>
+                <p className="mb-2 font-medium">Repayment</p>
                 <div className="max-h-64 overflow-y-auto rounded-xl border border-border">
                   <table className="w-full text-xs">
                     <thead className="bg-muted text-left">
@@ -485,7 +481,7 @@ function Info({ label, value }: { label: string; value: string }) {
   return (
     <div className="rounded-lg bg-muted px-3 py-2">
       <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
-      <p className="font-medium tabular-nums">{value}</p>
+      <p className="font-medium capitalize tabular-nums">{value}</p>
     </div>
   );
 }

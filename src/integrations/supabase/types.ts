@@ -204,6 +204,7 @@ export type Database = {
       businesses: {
         Row: {
           created_at: string
+          default_interest_rate: number
           id: string
           location: string
           name: string
@@ -214,6 +215,7 @@ export type Database = {
         }
         Insert: {
           created_at?: string
+          default_interest_rate?: number
           id?: string
           location?: string
           name: string
@@ -224,6 +226,7 @@ export type Database = {
         }
         Update: {
           created_at?: string
+          default_interest_rate?: number
           id?: string
           location?: string
           name?: string
@@ -385,6 +388,7 @@ export type Database = {
           business_id: string
           created_at: string
           created_by: string | null
+          due_date: string
           id: string
           installment_amount: number
           installments_count: number
@@ -404,11 +408,12 @@ export type Database = {
           business_id: string
           created_at?: string
           created_by?: string | null
+          due_date: string
           id?: string
           installment_amount?: number
           installments_count?: number
           interest_rate?: number
-          loan_term_months: number
+          loan_term_months?: number
           notes?: string
           principal_amount: number
           repayment_frequency?: Database["public"]["Enums"]["repayment_frequency"]
@@ -423,6 +428,7 @@ export type Database = {
           business_id?: string
           created_at?: string
           created_by?: string | null
+          due_date?: string
           id?: string
           installment_amount?: number
           installments_count?: number
