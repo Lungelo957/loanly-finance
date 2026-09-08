@@ -94,3 +94,67 @@ export function buildSchedule(terms: LoanTerms): LoanSchedule {
 export function outstandingBalance(totalRepayable: number, totalPaid: number): number {
   return round2(Math.max(0, (Number(totalRepayable) || 0) - (Number(totalPaid) || 0)));
 }
+
+/* ---------------------------------------------------------------------------
+ * Month-end lending model (the default for CashFlow)
+ * A loan issued on any day of a month is repaid in full on the LAST calendar
+ * day of that same month. Real calendar lengths, including leap years.
+ * ------------------------------------------------------------------------ */
+
+/** Last calendar day of the month the given ISO date falls in (YYYY-MM-DD). */
+export function monthEndDueDate(issueDateISO: string): string {
+  const d = new Date(`${issueDateISO}T00:00:00`);
+  if (Number.isNaN(d.getTime())) return issueDateISO;
+  // Day 0 of the next month === last day of this month (handles 28/29/30/31).
+  const last = new Date(d.getFullYear(), d.getMonth() + 1, 0);
+  const m = String(last.getMonth() + 1).padStart(2, "0");
+  const day = String(last.getDate()).padStart(2, "0");
+  return `${last.getFullYear()}-${m}-${day}`;
+}
+
+export interface MonthEndLoan {
+  principal: number;
+  interestRate: number;
+  interestAmount: number;
+  totalRepayable: number;
+  issueDate: string;
+  dueDate: string;
+}
+
+/** interest = principal x rate%, total = principal + interest. */
+export function computeMonthEndLoan(
+  principalInput: number | string,
+  rateInput: number | string,
+  issueDateISO: string,
+): MonthEndLoan {
+  const principal = Math.max(0, Number(principalInput) || 0);
+  const interestRate = Math.max(0, Number(rateInput) || 0);
+  const interestAmount = round2(principal * (interestRate / 100));
+  return {
+    principal,
+    interestRate,
+    interestAmount,
+    totalRepayable: round2(principal + interestAmount),
+    issueDate: issueDateISO,
+    dueDate: monthEndDueDate(issueDateISO),
+  };
+}
+
+export type LoanDisplayStatus = "active" | "due" | "overdue" | "paid" | "defaulted" | "cancelled";
+
+/** Live status from the due date and how much has actually been collected. */
+export function loanDisplayStatus(
+  storedStatus: string,
+  dueDateISO: string | null,
+  totalRepayable: number,
+  totalPaid: number,
+  todayISODate: string,
+): LoanDisplayStatus {
+  if (storedStatus === "cancelled") return "cancelled";
+  if (storedStatus === "completed" || outstandingBalance(totalRepayable, totalPaid) <= 0) return "paid";
+  if (storedStatus === "defaulted") return "defaulted";
+  if (!dueDateISO) return "active";
+  if (todayISODate > dueDateISO) return "overdue";
+  if (todayISODate === dueDateISO) return "due";
+  return "active";
+}
