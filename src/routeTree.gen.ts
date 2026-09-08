@@ -33,6 +33,7 @@ import { Route as BusinessAppExpensesRouteImport } from './routes/business/_app/
 import { Route as BusinessAppLoansRouteImport } from './routes/business/_app/loans'
 import { Route as BusinessAppPaymentsRouteImport } from './routes/business/_app/payments'
 import { Route as BusinessAppReportsRouteImport } from './routes/business/_app/reports'
+import { Route as BusinessAppSettingsRouteImport } from './routes/business/_app/settings'
 import { Route as BusinessAppSupportRouteImport } from './routes/business/_app/support'
 
 const IndexRoute = IndexRouteImport.update({
@@ -153,6 +154,11 @@ const BusinessAppReportsRoute = BusinessAppReportsRouteImport.update({
   path: '/reports',
   getParentRoute: () => BusinessAppRouteRoute,
 } as any)
+const BusinessAppSettingsRoute = BusinessAppSettingsRouteImport.update({
+  id: '/settings',
+  path: '/settings',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
 const BusinessAppSupportRoute = BusinessAppSupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -182,6 +188,7 @@ export interface FileRoutesByFullPath {
   '/business/loans': typeof BusinessAppLoansRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
   '/business/reports': typeof BusinessAppReportsRoute
+  '/business/settings': typeof BusinessAppSettingsRoute
   '/business/support': typeof BusinessAppSupportRoute
 }
 export interface FileRoutesByTo {
@@ -205,6 +212,7 @@ export interface FileRoutesByTo {
   '/business/loans': typeof BusinessAppLoansRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
   '/business/reports': typeof BusinessAppReportsRoute
+  '/business/settings': typeof BusinessAppSettingsRoute
   '/business/support': typeof BusinessAppSupportRoute
 }
 export interface FileRoutesById {
@@ -233,6 +241,7 @@ export interface FileRoutesById {
   '/business/_app/loans': typeof BusinessAppLoansRoute
   '/business/_app/payments': typeof BusinessAppPaymentsRoute
   '/business/_app/reports': typeof BusinessAppReportsRoute
+  '/business/_app/settings': typeof BusinessAppSettingsRoute
   '/business/_app/support': typeof BusinessAppSupportRoute
 }
 export interface FileRouteTypes {
@@ -260,6 +269,7 @@ export interface FileRouteTypes {
     | '/business/loans'
     | '/business/payments'
     | '/business/reports'
+    | '/business/settings'
     | '/business/support'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -283,6 +293,7 @@ export interface FileRouteTypes {
     | '/business/loans'
     | '/business/payments'
     | '/business/reports'
+    | '/business/settings'
     | '/business/support'
   id:
     | '__root__'
@@ -310,6 +321,7 @@ export interface FileRouteTypes {
     | '/business/_app/loans'
     | '/business/_app/payments'
     | '/business/_app/reports'
+    | '/business/_app/settings'
     | '/business/_app/support'
   fileRoutesById: FileRoutesById
 }
@@ -490,6 +502,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessAppReportsRouteImport
       parentRoute: typeof BusinessAppRouteRoute
     }
+    '/business/_app/settings': {
+      id: '/business/_app/settings'
+      path: '/settings'
+      fullPath: '/business/settings'
+      preLoaderRoute: typeof BusinessAppSettingsRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
     '/business/_app/support': {
       id: '/business/_app/support'
       path: '/support'
@@ -542,6 +561,7 @@ interface BusinessAppRouteRouteChildren {
   BusinessAppLoansRoute: typeof BusinessAppLoansRoute
   BusinessAppPaymentsRoute: typeof BusinessAppPaymentsRoute
   BusinessAppReportsRoute: typeof BusinessAppReportsRoute
+  BusinessAppSettingsRoute: typeof BusinessAppSettingsRoute
   BusinessAppSupportRoute: typeof BusinessAppSupportRoute
 }
 
@@ -555,6 +575,7 @@ const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
   BusinessAppLoansRoute: BusinessAppLoansRoute,
   BusinessAppPaymentsRoute: BusinessAppPaymentsRoute,
   BusinessAppReportsRoute: BusinessAppReportsRoute,
+  BusinessAppSettingsRoute: BusinessAppSettingsRoute,
   BusinessAppSupportRoute: BusinessAppSupportRoute,
 }
 
