@@ -21,6 +21,9 @@ import { Route as BusinessAppRouteRouteImport } from './routes/business/_app/rou
 import { Route as BusinessLoginRouteImport } from './routes/business/login'
 import { Route as BusinessPendingRouteImport } from './routes/business/pending'
 import { Route as BusinessRegisterRouteImport } from './routes/business/register'
+import { Route as AdminAppBusinessesRouteImport } from './routes/admin/_app/businesses'
+import { Route as AdminAppDashboardRouteImport } from './routes/admin/_app/dashboard'
+import { Route as AdminAppSupportRouteImport } from './routes/admin/_app/support'
 import { Route as BusinessAppAgreementsRouteImport } from './routes/business/_app/agreements'
 import { Route as BusinessAppBorrowersRouteImport } from './routes/business/_app/borrowers'
 import { Route as BusinessAppCapitalRouteImport } from './routes/business/_app/capital'
@@ -90,6 +93,21 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => BusinessRouteRoute,
 } as any)
+const AdminAppBusinessesRoute = AdminAppBusinessesRouteImport.update({
+  id: '/businesses',
+  path: '/businesses',
+  getParentRoute: () => AdminAppRouteRoute,
+} as any)
+const AdminAppDashboardRoute = AdminAppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AdminAppRouteRoute,
+} as any)
+const AdminAppSupportRoute = AdminAppSupportRouteImport.update({
+  id: '/support',
+  path: '/support',
+  getParentRoute: () => AdminAppRouteRoute,
+} as any)
 const BusinessAppAgreementsRoute = BusinessAppAgreementsRouteImport.update({
   id: '/agreements',
   path: '/agreements',
@@ -152,6 +170,9 @@ export interface FileRoutesByFullPath {
   '/business/register': typeof BusinessRegisterRoute
   '/admin/': typeof AdminIndexRoute
   '/business/': typeof BusinessIndexRoute
+  '/admin/businesses': typeof AdminAppBusinessesRoute
+  '/admin/dashboard': typeof AdminAppDashboardRoute
+  '/admin/support': typeof AdminAppSupportRoute
   '/business/agreements': typeof BusinessAppAgreementsRoute
   '/business/borrowers': typeof BusinessAppBorrowersRoute
   '/business/capital': typeof BusinessAppCapitalRoute
@@ -172,6 +193,9 @@ export interface FileRoutesByTo {
   '/business/login': typeof BusinessLoginRoute
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
+  '/admin/businesses': typeof AdminAppBusinessesRoute
+  '/admin/dashboard': typeof AdminAppDashboardRoute
+  '/admin/support': typeof AdminAppSupportRoute
   '/business/agreements': typeof BusinessAppAgreementsRoute
   '/business/borrowers': typeof BusinessAppBorrowersRoute
   '/business/capital': typeof BusinessAppCapitalRoute
@@ -189,7 +213,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRouteRouteWithChildren
   '/business': typeof BusinessRouteRouteWithChildren
   '/reset-password': typeof ResetPasswordRoute
-  '/admin/_app': typeof AdminAppRouteRoute
+  '/admin/_app': typeof AdminAppRouteRouteWithChildren
   '/business/_app': typeof BusinessAppRouteRouteWithChildren
   '/admin/login': typeof AdminLoginRoute
   '/business/login': typeof BusinessLoginRoute
@@ -197,6 +221,9 @@ export interface FileRoutesById {
   '/business/register': typeof BusinessRegisterRoute
   '/admin/': typeof AdminIndexRoute
   '/business/': typeof BusinessIndexRoute
+  '/admin/_app/businesses': typeof AdminAppBusinessesRoute
+  '/admin/_app/dashboard': typeof AdminAppDashboardRoute
+  '/admin/_app/support': typeof AdminAppSupportRoute
   '/business/_app/agreements': typeof BusinessAppAgreementsRoute
   '/business/_app/borrowers': typeof BusinessAppBorrowersRoute
   '/business/_app/capital': typeof BusinessAppCapitalRoute
@@ -221,6 +248,9 @@ export interface FileRouteTypes {
     | '/business/register'
     | '/admin/'
     | '/business/'
+    | '/admin/businesses'
+    | '/admin/dashboard'
+    | '/admin/support'
     | '/business/agreements'
     | '/business/borrowers'
     | '/business/capital'
@@ -241,6 +271,9 @@ export interface FileRouteTypes {
     | '/business/login'
     | '/business/pending'
     | '/business/register'
+    | '/admin/businesses'
+    | '/admin/dashboard'
+    | '/admin/support'
     | '/business/agreements'
     | '/business/borrowers'
     | '/business/capital'
@@ -265,6 +298,9 @@ export interface FileRouteTypes {
     | '/business/register'
     | '/admin/'
     | '/business/'
+    | '/admin/_app/businesses'
+    | '/admin/_app/dashboard'
+    | '/admin/_app/support'
     | '/business/_app/agreements'
     | '/business/_app/borrowers'
     | '/business/_app/capital'
@@ -370,6 +406,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRegisterRouteImport
       parentRoute: typeof BusinessRouteRoute
     }
+    '/admin/_app/businesses': {
+      id: '/admin/_app/businesses'
+      path: '/businesses'
+      fullPath: '/admin/businesses'
+      preLoaderRoute: typeof AdminAppBusinessesRouteImport
+      parentRoute: typeof AdminAppRouteRoute
+    }
+    '/admin/_app/dashboard': {
+      id: '/admin/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/admin/dashboard'
+      preLoaderRoute: typeof AdminAppDashboardRouteImport
+      parentRoute: typeof AdminAppRouteRoute
+    }
+    '/admin/_app/support': {
+      id: '/admin/_app/support'
+      path: '/support'
+      fullPath: '/admin/support'
+      preLoaderRoute: typeof AdminAppSupportRouteImport
+      parentRoute: typeof AdminAppRouteRoute
+    }
     '/business/_app/agreements': {
       id: '/business/_app/agreements'
       path: '/agreements'
@@ -443,14 +500,30 @@ declare module '@tanstack/react-router' {
   }
 }
 
+interface AdminAppRouteRouteChildren {
+  AdminAppBusinessesRoute: typeof AdminAppBusinessesRoute
+  AdminAppDashboardRoute: typeof AdminAppDashboardRoute
+  AdminAppSupportRoute: typeof AdminAppSupportRoute
+}
+
+const AdminAppRouteRouteChildren: AdminAppRouteRouteChildren = {
+  AdminAppBusinessesRoute: AdminAppBusinessesRoute,
+  AdminAppDashboardRoute: AdminAppDashboardRoute,
+  AdminAppSupportRoute: AdminAppSupportRoute,
+}
+
+const AdminAppRouteRouteWithChildren = AdminAppRouteRoute._addFileChildren(
+  AdminAppRouteRouteChildren,
+)
+
 interface AdminRouteRouteChildren {
-  AdminAppRouteRoute: typeof AdminAppRouteRoute
+  AdminAppRouteRoute: typeof AdminAppRouteRouteWithChildren
   AdminLoginRoute: typeof AdminLoginRoute
   AdminIndexRoute: typeof AdminIndexRoute
 }
 
 const AdminRouteRouteChildren: AdminRouteRouteChildren = {
-  AdminAppRouteRoute: AdminAppRouteRoute,
+  AdminAppRouteRoute: AdminAppRouteRouteWithChildren,
   AdminLoginRoute: AdminLoginRoute,
   AdminIndexRoute: AdminIndexRoute,
 }

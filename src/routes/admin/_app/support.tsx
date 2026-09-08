@@ -69,9 +69,9 @@ function AdminSupport() {
       status?: TicketStatus;
       admin_response?: string;
     }) => {
-      const patch: Record<string, unknown> = {};
-      if (status) patch["status"] = status;
-      if (admin_response !== undefined) patch["admin_response"] = admin_response;
+      const patch: { status?: TicketStatus; admin_response?: string } = {};
+      if (status) patch.status = status;
+      if (admin_response !== undefined) patch.admin_response = admin_response;
       const { error } = await supabase.from("support_tickets").update(patch).eq("id", id);
       if (error) throw new Error(error.message);
     },
