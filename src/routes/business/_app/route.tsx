@@ -8,6 +8,7 @@ import {
   LifeBuoy,
   Receipt,
   ScrollText,
+  Settings,
   Users,
   Wallet,
 } from "lucide-react";
