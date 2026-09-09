@@ -26,6 +26,7 @@ const items: NavItem[] = [
   { to: "/business/reports", label: "Reports", icon: BarChart3 },
   { to: "/business/agreements", label: "Agreements", icon: FileText },
   { to: "/business/support", label: "Support", icon: LifeBuoy },
+  { to: "/business/settings", label: "Settings", icon: Settings },
 ];
 
 export const Route = createFileRoute("/business/_app")({
