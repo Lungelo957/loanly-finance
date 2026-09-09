@@ -28,7 +28,7 @@ import {
   type Agreement,
 } from "@/lib/business-data";
 import { formatCurrency, formatDate } from "@/lib/format";
-import { FREQUENCY_LABEL, type Frequency } from "@/lib/finance";
+
 
 export const Route = createFileRoute("/business/_app/agreements")({
   head: () => ({
