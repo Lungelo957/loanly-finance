@@ -1,4 +1,5 @@
 import { redirect } from "@tanstack/react-router";
+import { toast } from "sonner";
 import type { QueryClient } from "@tanstack/react-query";
 import { accountQuery, canAccessWorkspace, type Account } from "@/lib/account";
 
@@ -18,6 +19,9 @@ export async function requireBusinessAccess(queryClient: QueryClient): Promise<A
 export async function requireAdminAccess(queryClient: QueryClient): Promise<Account> {
   const account = await queryClient.ensureQueryData(accountQuery);
   if (!account.userId) throw redirect({ to: "/admin/login" });
-  if (!account.isAdmin) throw redirect({ to: "/business/dashboard" });
+  if (!account.isAdmin) {
+    toast.error("Access denied. This area is for platform administrators only.");
+    throw redirect({ to: account.business ? "/business/dashboard" : "/business/login" });
+  }
   return account;
 }
