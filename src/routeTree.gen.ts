@@ -23,6 +23,7 @@ import { Route as BusinessPendingRouteImport } from './routes/business/pending'
 import { Route as BusinessRegisterRouteImport } from './routes/business/register'
 import { Route as AdminAppBusinessesRouteImport } from './routes/admin/_app/businesses'
 import { Route as AdminAppDashboardRouteImport } from './routes/admin/_app/dashboard'
+import { Route as AdminAppReliabilityRouteImport } from './routes/admin/_app/reliability'
 import { Route as AdminAppSupportRouteImport } from './routes/admin/_app/support'
 import { Route as BusinessAppAgreementsRouteImport } from './routes/business/_app/agreements'
 import { Route as BusinessAppBorrowersRouteImport } from './routes/business/_app/borrowers'
@@ -105,6 +106,11 @@ const AdminAppDashboardRoute = AdminAppDashboardRouteImport.update({
   path: '/dashboard',
   getParentRoute: () => AdminAppRouteRoute,
 } as any)
+const AdminAppReliabilityRoute = AdminAppReliabilityRouteImport.update({
+  id: '/reliability',
+  path: '/reliability',
+  getParentRoute: () => AdminAppRouteRoute,
+} as any)
 const AdminAppSupportRoute = AdminAppSupportRouteImport.update({
   id: '/support',
   path: '/support',
@@ -184,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/business/': typeof BusinessIndexRoute
   '/admin/businesses': typeof AdminAppBusinessesRoute
   '/admin/dashboard': typeof AdminAppDashboardRoute
+  '/admin/reliability': typeof AdminAppReliabilityRoute
   '/admin/support': typeof AdminAppSupportRoute
   '/business/agreements': typeof BusinessAppAgreementsRoute
   '/business/borrowers': typeof BusinessAppBorrowersRoute
@@ -209,6 +216,7 @@ export interface FileRoutesByTo {
   '/business/register': typeof BusinessRegisterRoute
   '/admin/businesses': typeof AdminAppBusinessesRoute
   '/admin/dashboard': typeof AdminAppDashboardRoute
+  '/admin/reliability': typeof AdminAppReliabilityRoute
   '/admin/support': typeof AdminAppSupportRoute
   '/business/agreements': typeof BusinessAppAgreementsRoute
   '/business/borrowers': typeof BusinessAppBorrowersRoute
@@ -239,6 +247,7 @@ export interface FileRoutesById {
   '/business/': typeof BusinessIndexRoute
   '/admin/_app/businesses': typeof AdminAppBusinessesRoute
   '/admin/_app/dashboard': typeof AdminAppDashboardRoute
+  '/admin/_app/reliability': typeof AdminAppReliabilityRoute
   '/admin/_app/support': typeof AdminAppSupportRoute
   '/business/_app/agreements': typeof BusinessAppAgreementsRoute
   '/business/_app/borrowers': typeof BusinessAppBorrowersRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/business/'
     | '/admin/businesses'
     | '/admin/dashboard'
+    | '/admin/reliability'
     | '/admin/support'
     | '/business/agreements'
     | '/business/borrowers'
@@ -293,6 +303,7 @@ export interface FileRouteTypes {
     | '/business/register'
     | '/admin/businesses'
     | '/admin/dashboard'
+    | '/admin/reliability'
     | '/admin/support'
     | '/business/agreements'
     | '/business/borrowers'
@@ -322,6 +333,7 @@ export interface FileRouteTypes {
     | '/business/'
     | '/admin/_app/businesses'
     | '/admin/_app/dashboard'
+    | '/admin/_app/reliability'
     | '/admin/_app/support'
     | '/business/_app/agreements'
     | '/business/_app/borrowers'
@@ -444,6 +456,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminAppDashboardRouteImport
       parentRoute: typeof AdminAppRouteRoute
     }
+    '/admin/_app/reliability': {
+      id: '/admin/_app/reliability'
+      path: '/reliability'
+      fullPath: '/admin/reliability'
+      preLoaderRoute: typeof AdminAppReliabilityRouteImport
+      parentRoute: typeof AdminAppRouteRoute
+    }
     '/admin/_app/support': {
       id: '/admin/_app/support'
       path: '/support'
@@ -541,12 +560,14 @@ declare module '@tanstack/react-router' {
 interface AdminAppRouteRouteChildren {
   AdminAppBusinessesRoute: typeof AdminAppBusinessesRoute
   AdminAppDashboardRoute: typeof AdminAppDashboardRoute
+  AdminAppReliabilityRoute: typeof AdminAppReliabilityRoute
   AdminAppSupportRoute: typeof AdminAppSupportRoute
 }
 
 const AdminAppRouteRouteChildren: AdminAppRouteRouteChildren = {
   AdminAppBusinessesRoute: AdminAppBusinessesRoute,
   AdminAppDashboardRoute: AdminAppDashboardRoute,
+  AdminAppReliabilityRoute: AdminAppReliabilityRoute,
   AdminAppSupportRoute: AdminAppSupportRoute,
 }
 
