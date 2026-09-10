@@ -32,6 +32,7 @@ import { Route as BusinessAppDashboardRouteImport } from './routes/business/_app
 import { Route as BusinessAppExpensesRouteImport } from './routes/business/_app/expenses'
 import { Route as BusinessAppLoansRouteImport } from './routes/business/_app/loans'
 import { Route as BusinessAppPaymentsRouteImport } from './routes/business/_app/payments'
+import { Route as BusinessAppReliabilityRouteImport } from './routes/business/_app/reliability'
 import { Route as BusinessAppReportsRouteImport } from './routes/business/_app/reports'
 import { Route as BusinessAppSettingsRouteImport } from './routes/business/_app/settings'
 import { Route as BusinessAppSupportRouteImport } from './routes/business/_app/support'
@@ -149,6 +150,11 @@ const BusinessAppPaymentsRoute = BusinessAppPaymentsRouteImport.update({
   path: '/payments',
   getParentRoute: () => BusinessAppRouteRoute,
 } as any)
+const BusinessAppReliabilityRoute = BusinessAppReliabilityRouteImport.update({
+  id: '/reliability',
+  path: '/reliability',
+  getParentRoute: () => BusinessAppRouteRoute,
+} as any)
 const BusinessAppReportsRoute = BusinessAppReportsRouteImport.update({
   id: '/reports',
   path: '/reports',
@@ -187,6 +193,7 @@ export interface FileRoutesByFullPath {
   '/business/expenses': typeof BusinessAppExpensesRoute
   '/business/loans': typeof BusinessAppLoansRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
+  '/business/reliability': typeof BusinessAppReliabilityRoute
   '/business/reports': typeof BusinessAppReportsRoute
   '/business/settings': typeof BusinessAppSettingsRoute
   '/business/support': typeof BusinessAppSupportRoute
@@ -211,6 +218,7 @@ export interface FileRoutesByTo {
   '/business/expenses': typeof BusinessAppExpensesRoute
   '/business/loans': typeof BusinessAppLoansRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
+  '/business/reliability': typeof BusinessAppReliabilityRoute
   '/business/reports': typeof BusinessAppReportsRoute
   '/business/settings': typeof BusinessAppSettingsRoute
   '/business/support': typeof BusinessAppSupportRoute
@@ -240,6 +248,7 @@ export interface FileRoutesById {
   '/business/_app/expenses': typeof BusinessAppExpensesRoute
   '/business/_app/loans': typeof BusinessAppLoansRoute
   '/business/_app/payments': typeof BusinessAppPaymentsRoute
+  '/business/_app/reliability': typeof BusinessAppReliabilityRoute
   '/business/_app/reports': typeof BusinessAppReportsRoute
   '/business/_app/settings': typeof BusinessAppSettingsRoute
   '/business/_app/support': typeof BusinessAppSupportRoute
@@ -268,6 +277,7 @@ export interface FileRouteTypes {
     | '/business/expenses'
     | '/business/loans'
     | '/business/payments'
+    | '/business/reliability'
     | '/business/reports'
     | '/business/settings'
     | '/business/support'
@@ -292,6 +302,7 @@ export interface FileRouteTypes {
     | '/business/expenses'
     | '/business/loans'
     | '/business/payments'
+    | '/business/reliability'
     | '/business/reports'
     | '/business/settings'
     | '/business/support'
@@ -320,6 +331,7 @@ export interface FileRouteTypes {
     | '/business/_app/expenses'
     | '/business/_app/loans'
     | '/business/_app/payments'
+    | '/business/_app/reliability'
     | '/business/_app/reports'
     | '/business/_app/settings'
     | '/business/_app/support'
@@ -495,6 +507,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessAppPaymentsRouteImport
       parentRoute: typeof BusinessAppRouteRoute
     }
+    '/business/_app/reliability': {
+      id: '/business/_app/reliability'
+      path: '/reliability'
+      fullPath: '/business/reliability'
+      preLoaderRoute: typeof BusinessAppReliabilityRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
     '/business/_app/reports': {
       id: '/business/_app/reports'
       path: '/reports'
@@ -560,6 +579,7 @@ interface BusinessAppRouteRouteChildren {
   BusinessAppExpensesRoute: typeof BusinessAppExpensesRoute
   BusinessAppLoansRoute: typeof BusinessAppLoansRoute
   BusinessAppPaymentsRoute: typeof BusinessAppPaymentsRoute
+  BusinessAppReliabilityRoute: typeof BusinessAppReliabilityRoute
   BusinessAppReportsRoute: typeof BusinessAppReportsRoute
   BusinessAppSettingsRoute: typeof BusinessAppSettingsRoute
   BusinessAppSupportRoute: typeof BusinessAppSupportRoute
@@ -574,6 +594,7 @@ const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
   BusinessAppExpensesRoute: BusinessAppExpensesRoute,
   BusinessAppLoansRoute: BusinessAppLoansRoute,
   BusinessAppPaymentsRoute: BusinessAppPaymentsRoute,
+  BusinessAppReliabilityRoute: BusinessAppReliabilityRoute,
   BusinessAppReportsRoute: BusinessAppReportsRoute,
   BusinessAppSettingsRoute: BusinessAppSettingsRoute,
   BusinessAppSupportRoute: BusinessAppSupportRoute,
