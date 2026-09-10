@@ -113,6 +113,70 @@ export type Database = {
           },
         ]
       }
+      borrower_consents: {
+        Row: {
+          borrower_id: string
+          business_id: string
+          created_at: string
+          granted_at: string | null
+          id: string
+          method: string
+          network_borrower_id: string | null
+          recorded_by: string | null
+          revoked_at: string | null
+          status: Database["public"]["Enums"]["consent_status"]
+          updated_at: string
+        }
+        Insert: {
+          borrower_id: string
+          business_id: string
+          created_at?: string
+          granted_at?: string | null
+          id?: string
+          method?: string
+          network_borrower_id?: string | null
+          recorded_by?: string | null
+          revoked_at?: string | null
+          status?: Database["public"]["Enums"]["consent_status"]
+          updated_at?: string
+        }
+        Update: {
+          borrower_id?: string
+          business_id?: string
+          created_at?: string
+          granted_at?: string | null
+          id?: string
+          method?: string
+          network_borrower_id?: string | null
+          recorded_by?: string | null
+          revoked_at?: string | null
+          status?: Database["public"]["Enums"]["consent_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "borrower_consents_borrower_id_fkey"
+            columns: ["borrower_id"]
+            isOneToOne: true
+            referencedRelation: "borrowers"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "borrower_consents_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "borrower_consents_network_borrower_id_fkey"
+            columns: ["network_borrower_id"]
+            isOneToOne: false
+            referencedRelation: "network_borrowers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       borrowers: {
         Row: {
           address: string
@@ -125,6 +189,7 @@ export type Database = {
           id: string
           id_number: string
           monthly_income: number
+          network_borrower_id: string | null
           notes: string
           phone: string
           updated_at: string
@@ -140,6 +205,7 @@ export type Database = {
           id?: string
           id_number?: string
           monthly_income?: number
+          network_borrower_id?: string | null
           notes?: string
           phone?: string
           updated_at?: string
@@ -155,6 +221,7 @@ export type Database = {
           id?: string
           id_number?: string
           monthly_income?: number
+          network_borrower_id?: string | null
           notes?: string
           phone?: string
           updated_at?: string
@@ -165,6 +232,13 @@ export type Database = {
             columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "borrowers_network_borrower_id_fkey"
+            columns: ["network_borrower_id"]
+            isOneToOne: false
+            referencedRelation: "network_borrowers"
             referencedColumns: ["id"]
           },
         ]
@@ -210,6 +284,7 @@ export type Database = {
           name: string
           owner_id: string
           package: string
+          reliability_network_enabled: boolean
           status: Database["public"]["Enums"]["business_status"]
           updated_at: string
         }
@@ -221,6 +296,7 @@ export type Database = {
           name: string
           owner_id: string
           package?: string
+          reliability_network_enabled?: boolean
           status?: Database["public"]["Enums"]["business_status"]
           updated_at?: string
         }
@@ -232,6 +308,7 @@ export type Database = {
           name?: string
           owner_id?: string
           package?: string
+          reliability_network_enabled?: boolean
           status?: Database["public"]["Enums"]["business_status"]
           updated_at?: string
         }
@@ -460,6 +537,27 @@ export type Database = {
           },
         ]
       }
+      network_borrowers: {
+        Row: {
+          created_at: string
+          id: string
+          identifier_hash: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          identifier_hash: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          identifier_hash?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       notifications: {
         Row: {
           body: string
@@ -586,6 +684,51 @@ export type Database = {
         }
         Relationships: []
       }
+      reliability_searches: {
+        Row: {
+          business_id: string
+          created_at: string
+          id: string
+          network_borrower_id: string | null
+          purpose: string
+          result_type: string
+          user_id: string | null
+        }
+        Insert: {
+          business_id: string
+          created_at?: string
+          id?: string
+          network_borrower_id?: string | null
+          purpose?: string
+          result_type?: string
+          user_id?: string | null
+        }
+        Update: {
+          business_id?: string
+          created_at?: string
+          id?: string
+          network_borrower_id?: string | null
+          purpose?: string
+          result_type?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reliability_searches_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reliability_searches_network_borrower_id_fkey"
+            columns: ["network_borrower_id"]
+            isOneToOne: false
+            referencedRelation: "network_borrowers"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       support_tickets: {
         Row: {
           admin_response: string
@@ -678,6 +821,7 @@ export type Database = {
         | "suspended"
         | "rejected"
       capital_entry_type: "initial" | "injection" | "withdrawal"
+      consent_status: "pending" | "granted" | "denied" | "revoked"
       loan_status: "active" | "completed" | "defaulted" | "cancelled"
       repayment_frequency: "weekly" | "biweekly" | "monthly"
       repayment_status: "pending" | "partial" | "paid" | "overdue"
@@ -818,6 +962,7 @@ export const Constants = {
         "rejected",
       ],
       capital_entry_type: ["initial", "injection", "withdrawal"],
+      consent_status: ["pending", "granted", "denied", "revoked"],
       loan_status: ["active", "completed", "defaulted", "cancelled"],
       repayment_frequency: ["weekly", "biweekly", "monthly"],
       repayment_status: ["pending", "partial", "paid", "overdue"],
