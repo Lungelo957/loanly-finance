@@ -9,6 +9,7 @@ import {
   Receipt,
   ScrollText,
   Settings,
+  ShieldCheck,
   Users,
   Wallet,
 } from "lucide-react";
@@ -20,6 +21,7 @@ const items: NavItem[] = [
   { to: "/business/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/business/capital", label: "Capital", icon: Wallet },
   { to: "/business/borrowers", label: "Borrowers", icon: Users },
+  { to: "/business/reliability", label: "Reliability check", icon: ShieldCheck },
   { to: "/business/loans", label: "Loans", icon: HandCoins },
   { to: "/business/payments", label: "Payments", icon: Banknote },
   { to: "/business/collections", label: "Collections", icon: Receipt },
