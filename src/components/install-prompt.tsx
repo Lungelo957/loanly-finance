@@ -35,13 +35,13 @@ export function InstallPrompt() {
     <div className="fixed inset-x-3 bottom-3 z-50 sm:left-auto sm:right-4 sm:w-80">
       <div className="card-surface p-4 shadow-lift">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 rounded-lg bg-accent p-2 text-accent-foreground">
+          <span className="mt-0.5 rounded-lg gold-gradient p-2 text-primary-foreground">
             <Download className="h-4 w-4" />
           </span>
           <div className="flex-1">
             <p className="text-sm font-semibold">Install CashFlow</p>
             <p className="mt-1 text-xs text-muted-foreground">
-              Install CashFlow on your phone or computer for quick access.
+              Get faster access to your CashFlow dashboard.
             </p>
             <div className="mt-3 flex gap-2">
               <Button
