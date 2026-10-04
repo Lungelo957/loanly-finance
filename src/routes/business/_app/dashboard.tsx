@@ -70,11 +70,14 @@ function DashboardPage() {
 
   const recentLoans = (loans.data ?? []).slice(0, 5);
 
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+
   return (
     <div>
       <PageHeader
-        title={account?.business?.name ?? "Dashboard"}
-        description="Key financial indicators, calculated from your records."
+        title={greeting}
+        description={`${account?.business?.name ?? "Your business"} · ${formatCurrency(metrics.outstandingBalance)} outstanding across ${formatNumber(metrics.activeLoans)} active loans.`}
       />
 
       <div className="grid grid-cols-2 gap-2.5 sm:gap-3 lg:grid-cols-4">
