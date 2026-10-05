@@ -1,7 +1,8 @@
 {
-  "name": "CashFlow — Loan Management",
+  "name": "CashFlow",
   "short_name": "CashFlow",
-  "description": "Manage capital, borrowers, loans, repayments and reports in one secure workspace.",
+  "description": "CashFlow — Simple lending and loan management for businesses.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",

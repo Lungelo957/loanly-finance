@@ -9,6 +9,7 @@ import { Label } from "@/components/ui/label";
 import { supabase } from "@/integrations/supabase/client";
 import { useAccount } from "@/lib/account";
 import { friendlyError } from "@/lib/business-data";
+import { InstallAppButton } from "@/components/install-prompt";
 
 export const Route = createFileRoute("/business/_app/settings")({
   head: () => ({
@@ -63,7 +64,7 @@ function SettingsPage() {
 
   return (
     <div>
-      <PageHeader title="Business settings" description="Defaults used every time you create a loan." />
+      <PageHeader title="Business settings" description="Defaults used every time you create a loan." action={<InstallAppButton />} />
 
       <form
         className="card-surface max-w-md space-y-4 p-5"

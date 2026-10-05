@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Toaster } from "@/components/ui/sonner";
 import { supabase } from "@/integrations/supabase/client";
-import { InstallPrompt } from "@/components/install-prompt";
+import { InstallPrompt, OfflineBanner } from "@/components/install-prompt";
 
 function NotFoundComponent() {
   return (
@@ -143,17 +143,11 @@ function RootComponent() {
     return () => data.subscription.unsubscribe();
   }, [queryClient, router]);
 
-  useEffect(() => {
-    if (!("serviceWorker" in navigator)) return;
-    const onLoad = () => void navigator.serviceWorker.register("/sw.js").catch(() => {});
-    window.addEventListener("load", onLoad);
-    return () => window.removeEventListener("load", onLoad);
-  }, []);
-
   return (
     <QueryClientProvider client={queryClient}>
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />
+      <OfflineBanner />
       <InstallPrompt />
       <Toaster position="top-right" richColors />
     </QueryClientProvider>

@@ -8,3 +8,5 @@
 > Commits you push to the connected branch sync back to Lovable and show up in
 > the editor, so keep the branch in a working state.
 <!-- LOVABLE:END -->
+
+- PWA: vite-plugin-pwa generateSW (outDir dist/client, no HTML/API caching) registered only via src/lib/pwa-register.ts; manifest lives in public/manifest.webmanifest. Why: single safe SW that never caches private financial data or runs in preview.
