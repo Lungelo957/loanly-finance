@@ -44,12 +44,31 @@ function isH3SwallowedErrorBody(body: string): boolean {
   }
 }
 
+// Security headers. Framing is limited to this site and the Lovable editor (needed for preview).
+function withSecurityHeaders(response: Response): Response {
+  try {
+    const h = response.headers;
+    h.set("X-Content-Type-Options", "nosniff");
+    h.set("Referrer-Policy", "strict-origin-when-cross-origin");
+    h.set("Permissions-Policy", "camera=(), microphone=(), geolocation=(), payment=()");
+    h.set("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+    h.set(
+      "Content-Security-Policy",
+      "frame-ancestors 'self' https://*.lovable.app https://*.lovable.dev https://lovable.dev https://*.lovableproject.com; object-src 'none'; base-uri 'self'",
+    );
+    return response;
+  } catch {
+    // Some responses have immutable headers; return them unchanged.
+    return response;
+  }
+}
+
 export default {
   async fetch(request: Request, env: unknown, ctx: unknown) {
     try {
       const handler = await getServerEntry();
       const response = await handler.fetch(request, env, ctx);
-      return await normalizeCatastrophicSsrResponse(response);
+      return withSecurityHeaders(await normalizeCatastrophicSsrResponse(response));
     } catch (error) {
       console.error(error);
       return new Response(renderErrorPage(), {
