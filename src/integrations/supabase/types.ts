@@ -809,6 +809,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      is_active_business_member: {
+        Args: { _business_id: string }
+        Returns: boolean
+      }
       is_admin: { Args: never; Returns: boolean }
       is_business_member: { Args: { _business_id: string }; Returns: boolean }
     }
