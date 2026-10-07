@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, ShieldCheck, Users, Wallet } from "lucide-react";
-import { BrandMark } from "@/components/brand";
+import { BrandMark, FullLogo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
