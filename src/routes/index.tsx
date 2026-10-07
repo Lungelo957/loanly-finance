@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowRight, BarChart3, ShieldCheck, Users, Wallet } from "lucide-react";
-import { BrandMark } from "@/components/brand";
+import { BrandMark, FullLogo } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 
 export const Route = createFileRoute("/")({
@@ -63,6 +63,7 @@ function Landing() {
 
       <main>
         <section className="mx-auto max-w-6xl px-4 pb-16 pt-10 sm:pt-16">
+          <FullLogo className="mb-6 block w-40 sm:w-56" />
           <p className="inline-flex items-center gap-2 rounded-full border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground">
             <span className="h-1.5 w-1.5 rounded-full bg-gold" />
             Loan management, built for lenders
