@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { FullLogo } from "@/components/brand";
+import { SiteCredit } from "@/components/site-credit";
 
 export function AuthLayout({
   title,
@@ -16,7 +17,7 @@ export function AuthLayout({
   portal?: string;
 }) {
   return (
-    <div className="flex min-h-screen flex-col bg-background bg-[radial-gradient(ellipse_at_top,var(--color-accent),transparent_60%)]">
+    <div className="flex min-h-screen flex-col bg-background">
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
         <div className="mb-6 flex flex-col items-center gap-2">
           <Link to="/" aria-label="CashFlow home">
@@ -34,6 +35,7 @@ export function AuthLayout({
         </div>
         {footer ? <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div> : null}
       </div>
+      <footer className="mx-auto w-full max-w-lg px-5 pb-6"><SiteCredit /></footer>
     </div>
   );
 }

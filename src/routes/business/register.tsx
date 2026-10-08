@@ -21,6 +21,8 @@ export const Route = createFileRoute("/business/register")({
         property: "og:description",
         content: "Create a CashFlow account for your lending business.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: BusinessRegister,

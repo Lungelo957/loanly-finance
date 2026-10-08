@@ -36,6 +36,8 @@ export const Route = createFileRoute("/admin/_app/support")({
       { name: "description", content: "Read, answer, resolve and remove business support tickets." },
       { property: "og:title", content: "Support queue — CashFlow admin" },
       { property: "og:description", content: "Read, answer, resolve and remove support tickets." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AdminSupport,

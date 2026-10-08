@@ -39,6 +39,8 @@ export const Route = createFileRoute("/business/_app/loans")({
       { name: "description", content: "Issue month-end loans and follow every repayment." },
       { property: "og:title", content: "Loans — CashFlow" },
       { property: "og:description", content: "Issue month-end loans and follow every repayment." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: LoansPage,

@@ -15,6 +15,8 @@ export const Route = createFileRoute("/admin/_app/reliability")({
       { name: "description", content: "Control which businesses take part in the reliability network." },
       { property: "og:title", content: "Reliability network — CashFlow admin" },
       { property: "og:description", content: "Participation, consent statistics and search activity." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AdminReliabilityPage,

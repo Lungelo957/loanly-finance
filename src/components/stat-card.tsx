@@ -34,7 +34,7 @@ export function StatCard({
         ) : null}
         <p className="min-w-0 truncate text-[11px] font-medium text-muted-foreground sm:text-xs">{label}</p>
       </div>
-      <p className={`mt-3 truncate text-lg font-semibold tabular-nums tracking-tight sm:text-2xl ${toneClass}`}>
+      <p className={`mt-3 truncate text-lg font-semibold tabular-nums sm:text-2xl ${toneClass}`}>
         {value}
       </p>
       {hint ? <p className="mt-0.5 truncate text-[11px] text-muted-foreground">{hint}</p> : null}

@@ -29,6 +29,8 @@ export const Route = createFileRoute("/business/_app/expenses")({
       { name: "description", content: "Track what it costs to run your lending business." },
       { property: "og:title", content: "Expenses — CashFlow" },
       { property: "og:description", content: "Track what it costs to run your lending business." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ExpensesPage,

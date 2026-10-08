@@ -45,6 +45,8 @@ export const Route = createFileRoute("/business/_app/capital")({
       { name: "description", content: "Track capital injections, withdrawals and available funds." },
       { property: "og:title", content: "Capital — CashFlow" },
       { property: "og:description", content: "Track capital injections and available funds." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: CapitalPage,

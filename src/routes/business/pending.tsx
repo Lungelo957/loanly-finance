@@ -13,6 +13,16 @@ export const Route = createFileRoute("/business/pending")({
       throw redirect({ to: "/business/dashboard" });
     }
   },
+  head: () => ({
+    meta: [
+      { title: "Business approval status — CashFlow" },
+      { name: "description", content: "Check your CashFlow business workspace approval status." },
+      { property: "og:title", content: "Business approval status — CashFlow" },
+      { property: "og:description", content: "Check your CashFlow business workspace approval status." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
+    ],
+  }),
   component: PendingPage,
 });
 

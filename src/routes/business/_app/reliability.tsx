@@ -35,6 +35,8 @@ export const Route = createFileRoute("/business/_app/reliability")({
         property: "og:description",
         content: "Consent-based repayment reliability summaries for lending decisions.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ReliabilityPage,

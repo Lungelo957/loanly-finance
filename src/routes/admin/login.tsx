@@ -17,6 +17,8 @@ export const Route = createFileRoute("/admin/login")({
       { name: "description", content: "Sign in to the CashFlow platform administration portal." },
       { property: "og:title", content: "Administrator sign in — CashFlow" },
       { property: "og:description", content: "Sign in to the CashFlow administration portal." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AdminLogin,
