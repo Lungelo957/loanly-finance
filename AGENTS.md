@@ -10,3 +10,4 @@
 <!-- LOVABLE:END -->
 
 - PWA: vite-plugin-pwa generateSW (outDir dist/client, no HTML/API caching) registered only via src/lib/pwa-register.ts; manifest lives in public/manifest.webmanifest. Why: single safe SW that never caches private financial data or runs in preview.
+- Keep shared presentation in semantic CSS tokens and reuse SiteCredit across public and portal footers; this keeps visual updates and attribution consistent without touching business logic.
