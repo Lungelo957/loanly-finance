@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { FullLogo } from "@/components/brand";
-import { SiteCredit } from "@/components/site-credit";
 
 export function AuthLayout({
   title,
@@ -35,7 +34,6 @@ export function AuthLayout({
         </div>
         {footer ? <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div> : null}
       </div>
-      <footer className="mx-auto w-full max-w-lg px-5 pb-6"><SiteCredit /></footer>
     </div>
   );
 }
