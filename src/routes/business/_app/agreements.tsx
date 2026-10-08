@@ -37,6 +37,8 @@ export const Route = createFileRoute("/business/_app/agreements")({
       { name: "description", content: "Draft and store loan agreements for your borrowers." },
       { property: "og:title", content: "Agreements — CashFlow" },
       { property: "og:description", content: "Draft and store loan agreements for your borrowers." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AgreementsPage,

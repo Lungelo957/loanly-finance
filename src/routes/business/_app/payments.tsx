@@ -35,6 +35,8 @@ export const Route = createFileRoute("/business/_app/payments")({
       { name: "description", content: "Record repayments and keep balances accurate." },
       { property: "og:title", content: "Payments — CashFlow" },
       { property: "og:description", content: "Record repayments and keep balances accurate." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: PaymentsPage,

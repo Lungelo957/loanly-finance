@@ -24,6 +24,8 @@ export const Route = createFileRoute("/business/_app/reports")({
       { name: "description", content: "Loan, borrower, payment, collection and expense reporting." },
       { property: "og:title", content: "Reports — CashFlow" },
       { property: "og:description", content: "Loan, borrower, payment and expense reporting." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: ReportsPage,

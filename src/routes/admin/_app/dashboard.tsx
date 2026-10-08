@@ -15,6 +15,8 @@ export const Route = createFileRoute("/admin/_app/dashboard")({
       { name: "description", content: "Platform-wide activity across every CashFlow business." },
       { property: "og:title", content: "Admin dashboard — CashFlow" },
       { property: "og:description", content: "Platform-wide activity across every CashFlow business." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AdminDashboard,

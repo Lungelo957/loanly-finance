@@ -18,6 +18,8 @@ export const Route = createFileRoute("/business/_app/settings")({
       { name: "description", content: "Set your default lending interest rate." },
       { property: "og:title", content: "Business settings — CashFlow" },
       { property: "og:description", content: "Set your default lending interest rate." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: SettingsPage,

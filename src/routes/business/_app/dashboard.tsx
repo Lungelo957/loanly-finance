@@ -32,6 +32,8 @@ export const Route = createFileRoute("/business/_app/dashboard")({
       { name: "description", content: "Your live lending performance at a glance." },
       { property: "og:title", content: "Dashboard — CashFlow" },
       { property: "og:description", content: "Your live lending performance at a glance." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: DashboardPage,

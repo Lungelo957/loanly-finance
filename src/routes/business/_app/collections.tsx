@@ -16,6 +16,8 @@ export const Route = createFileRoute("/business/_app/collections")({
       { name: "description", content: "See what is due, overdue and already collected." },
       { property: "og:title", content: "Collections — CashFlow" },
       { property: "og:description", content: "See what is due, overdue and already collected." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: CollectionsPage,

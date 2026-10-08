@@ -23,6 +23,8 @@ export const Route = createFileRoute("/business/_app/support")({
       { name: "description", content: "Raise a support ticket and follow platform notifications." },
       { property: "og:title", content: "Support — CashFlow" },
       { property: "og:description", content: "Raise a support ticket with the CashFlow team." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: SupportPage,

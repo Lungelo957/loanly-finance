@@ -32,6 +32,8 @@ export const Route = createFileRoute("/business/_app/borrowers")({
       { name: "description", content: "Manage every borrower on your books." },
       { property: "og:title", content: "Borrowers — CashFlow" },
       { property: "og:description", content: "Manage every borrower on your books." },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: BorrowersPage,

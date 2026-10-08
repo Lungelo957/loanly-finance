@@ -24,6 +24,8 @@ export const Route = createFileRoute("/admin/_app/businesses")({
         property: "og:description",
         content: "Approve, reject, activate or suspend registered businesses.",
       },
+      { property: "og:type", content: "website" },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
   }),
   component: AdminBusinesses,
