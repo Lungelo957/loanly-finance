@@ -5,6 +5,7 @@ import { LogOut, Menu, MoreHorizontal, X, type LucideIcon } from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/account";
+import { SiteCredit } from "@/components/site-credit";
 
 export interface NavItem {
   to: string;
@@ -127,7 +128,7 @@ export function AppShell({
       ) : null}
 
       <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
-        <header className="sticky top-0 z-40 border-b border-border bg-background/85 backdrop-blur">
+        <header className="sticky top-0 z-40 border-b border-border bg-card/95 backdrop-blur">
           <div className="flex h-14 items-center gap-3 px-4 sm:px-6 lg:h-16 lg:px-8">
             <Button
               variant="ghost"
@@ -159,6 +160,9 @@ export function AppShell({
         >
           {children}
         </main>
+        <footer className="border-t border-border bg-card px-4 pb-24 pt-4 sm:px-6 lg:px-8 lg:pb-4">
+          <SiteCredit />
+        </footer>
       </div>
 
       {/* Mobile bottom navigation */}
