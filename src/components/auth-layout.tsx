@@ -35,7 +35,6 @@ export function AuthLayout({
         </div>
         {footer ? <div className="mt-6 text-center text-sm text-muted-foreground">{footer}</div> : null}
       </div>
-      <footer className="mx-auto w-full max-w-lg px-5 pb-6"><SiteCredit /></footer>
     </div>
   );
 }
