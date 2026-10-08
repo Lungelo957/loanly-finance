@@ -1,7 +1,6 @@
 import type { ReactNode } from "react";
 import { Link } from "@tanstack/react-router";
 import { FullLogo } from "@/components/brand";
-import { SiteCredit } from "@/components/site-credit";
 
 export function AuthLayout({
   title,

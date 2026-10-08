@@ -5,7 +5,6 @@ import { LogOut, Menu, MoreHorizontal, X, type LucideIcon } from "lucide-react";
 import { BrandMark } from "@/components/brand";
 import { Button } from "@/components/ui/button";
 import { signOutAndRedirect } from "@/lib/account";
-import { SiteCredit } from "@/components/site-credit";
 
 export interface NavItem {
   to: string;
