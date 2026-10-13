@@ -50,18 +50,6 @@ const LEVEL_TONE: Record<string, string> = {
   high_risk: "bg-red-100 text-red-800",
 };
 
-<<<<<<< HEAD
-function showReliabilityError(error: unknown, fallback: string) {
-  if (import.meta.env.DEV && error instanceof Error) {
-    console.error("[Borrower reliability] Request failed", { message: error.message });
-    toast.error(error.message);
-    return;
-  }
-  toast.error(friendlyError(error, fallback));
-}
-
-=======
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
 function ReliabilityPage() {
   const { data: account } = useAccount();
   const businessId = account?.business?.id;
@@ -101,11 +89,7 @@ function ReliabilityPage() {
       await queryClient.invalidateQueries({ queryKey: ["business", businessId, "consents"] });
       toast.success(`Data-sharing preference recorded as ${CONSENT_LABEL[r.status as ConsentStatus]}.`);
     },
-<<<<<<< HEAD
-    onError: (e) => showReliabilityError(e, "We couldn't record that consent."),
-=======
     onError: (e) => toast.error(friendlyError(e, "We couldn't record that consent.")),
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
   });
 
   const check = useMutation({
@@ -114,11 +98,7 @@ function ReliabilityPage() {
       return runCheck({ data: { borrowerId } });
     },
     onSuccess: (r) => setResult(r),
-<<<<<<< HEAD
-    onError: (e) => showReliabilityError(e, "We couldn't complete the reliability check."),
-=======
     onError: (e) => toast.error(friendlyError(e, "We couldn't complete the reliability check.")),
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
   });
 
   if (isLoading) return <LoadingState label="Loading borrowers..." />;
