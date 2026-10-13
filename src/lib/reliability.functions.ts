@@ -15,21 +15,6 @@ const HOURLY_SEARCH_LIMIT = 20;
 
 const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
 
-<<<<<<< HEAD
-function throwReliabilityError(
-  operation: string,
-  error: { code?: string; message: string },
-): never {
-  console.error("[Borrower reliability] Database operation failed", {
-    operation,
-    code: error.code,
-    message: error.message,
-  });
-  throw new Error(`${operation}: ${error.message}`);
-}
-
-=======
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
 function normalise(value: string | null | undefined): string {
   return (value ?? "").trim().toLowerCase().replace(/[\s()-]/g, "");
 }
@@ -84,11 +69,7 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
       .select("id, business_id, id_number, phone, email, network_borrower_id")
       .eq("id", data.borrowerId)
       .maybeSingle();
-<<<<<<< HEAD
-    if (error) throwReliabilityError("borrowers.read", error);
-=======
     if (error) throw new Error(error.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     if (!borrower) throw new Error("Borrower not found.");
 
     let networkBorrowerId = borrower.network_borrower_id as string | null;
@@ -106,11 +87,7 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
         .select("id")
         .eq("identifier_hash", hash)
         .maybeSingle();
-<<<<<<< HEAD
-      if (existing.error) throwReliabilityError("network_borrowers.lookup", existing.error);
-=======
       if (existing.error) throw new Error(existing.error.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
       if (existing.data) {
         networkBorrowerId = existing.data.id;
       } else {
@@ -119,22 +96,14 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
           .insert({ identifier_hash: hash })
           .select("id")
           .single();
-<<<<<<< HEAD
-        if (created.error) throwReliabilityError("network_borrowers.insert", created.error);
-=======
         if (created.error) throw new Error(created.error.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
         networkBorrowerId = created.data.id;
       }
       const linked = await supabaseAdmin
         .from("borrowers")
         .update({ network_borrower_id: networkBorrowerId })
         .eq("id", borrower.id);
-<<<<<<< HEAD
-      if (linked.error) throwReliabilityError("borrowers.link_network_identity", linked.error);
-=======
       if (linked.error) throw new Error(linked.error.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     }
 
     const now = new Date().toISOString();
@@ -151,11 +120,7 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
       },
       { onConflict: "borrower_id" },
     );
-<<<<<<< HEAD
-    if (upsertError) throwReliabilityError("borrower_consents.upsert", upsertError);
-=======
     if (upsertError) throw new Error(upsertError.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
 
     return { ok: true, status: data.status };
   });
@@ -180,11 +145,7 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       .select("id, business_id, id_number, phone, email, network_borrower_id")
       .eq("id", data.borrowerId)
       .maybeSingle();
-<<<<<<< HEAD
-    if (error) throwReliabilityError("borrowers.read", error);
-=======
     if (error) throw new Error(error.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     if (!borrower) throw new Error("Borrower not found.");
 
     const { data: business, error: bizError } = await supabase
@@ -192,11 +153,7 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       .select("id, reliability_network_enabled")
       .eq("id", borrower.business_id)
       .maybeSingle();
-<<<<<<< HEAD
-    if (bizError) throwReliabilityError("businesses.read_network_participation", bizError);
-=======
     if (bizError) throw new Error(bizError.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     if (!business?.reliability_network_enabled) {
       return {
         status: "not_participating",
@@ -206,19 +163,11 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       };
     }
 
-<<<<<<< HEAD
-    const { data: consent, error: consentError } = await supabase
-=======
     const { data: consent } = await supabase
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
       .from("borrower_consents")
       .select("status")
       .eq("borrower_id", borrower.id)
       .maybeSingle();
-<<<<<<< HEAD
-    if (consentError) throwReliabilityError("borrower_consents.read_requester", consentError);
-=======
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     if (consent?.status !== "granted") {
       return {
         status: "consent_unavailable",
@@ -230,19 +179,11 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
 
     // Rate limiting — protects the network from mass scraping.
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-<<<<<<< HEAD
-    const { count, error: searchCountError } = await supabase
-=======
     const { count } = await supabase
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
       .from("reliability_searches")
       .select("id", { count: "exact", head: true })
       .eq("business_id", borrower.business_id)
       .gte("created_at", since);
-<<<<<<< HEAD
-    if (searchCountError) throwReliabilityError("reliability_searches.count", searchCountError);
-=======
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     if ((count ?? 0) >= HOURLY_SEARCH_LIMIT) {
       throw new Error("Search limit reached. Please try again later.");
     }
@@ -257,29 +198,17 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
         .select("id")
         .eq("identifier_hash", hash)
         .maybeSingle();
-<<<<<<< HEAD
-      if (found.error) throwReliabilityError("network_borrowers.lookup", found.error);
-=======
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
       networkId = found.data?.id ?? null;
     }
 
     const logSearch = async (resultType: string) => {
-<<<<<<< HEAD
-      const { error: logError } = await supabaseAdmin.from("reliability_searches").insert({
-=======
       await supabaseAdmin.from("reliability_searches").insert({
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
         business_id: borrower.business_id,
         user_id: userId,
         network_borrower_id: networkId,
         purpose: "loan_assessment",
         result_type: resultType,
       });
-<<<<<<< HEAD
-      if (logError) throwReliabilityError("reliability_searches.insert", logError);
-=======
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     };
 
     if (!networkId) {
@@ -293,11 +222,7 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       .select("id, business_id, businesses!inner(reliability_network_enabled)")
       .eq("network_borrower_id", networkId)
       .eq("businesses.reliability_network_enabled", true);
-<<<<<<< HEAD
-    if (peerError) throwReliabilityError("borrowers.read_network_peers", peerError);
-=======
     if (peerError) throw new Error(peerError.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
 
     const peerIds = (peers ?? []).map((p) => p.id);
     if (peerIds.length === 0) {
@@ -305,19 +230,11 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       return { status: "no_history", level: null, metrics: null, explanation: NO_HISTORY_MESSAGE };
     }
 
-<<<<<<< HEAD
-    const { data: consents, error: peerConsentError } = await supabaseAdmin
-=======
     const { data: consents } = await supabaseAdmin
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
       .from("borrower_consents")
       .select("borrower_id, status")
       .in("borrower_id", peerIds)
       .eq("status", "granted");
-<<<<<<< HEAD
-    if (peerConsentError) throwReliabilityError("borrower_consents.read_network_peers", peerConsentError);
-=======
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
     const consentedIds = (consents ?? []).map((c) => c.borrower_id);
     if (consentedIds.length === 0) {
       await logSearch("consent_unavailable");
@@ -333,11 +250,7 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       .from("loans")
       .select("id, total_repayable, due_date, status")
       .in("borrower_id", consentedIds);
-<<<<<<< HEAD
-    if (loanError) throwReliabilityError("loans.read_network_aggregate", loanError);
-=======
     if (loanError) throw new Error(loanError.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
 
     const relevant = (loans ?? []).filter((l) => l.status !== "cancelled");
     if (relevant.length === 0) {
@@ -352,11 +265,7 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
         "loan_id",
         relevant.map((l) => l.id),
       );
-<<<<<<< HEAD
-    if (payError) throwReliabilityError("payments.read_network_aggregate", payError);
-=======
     if (payError) throw new Error(payError.message);
->>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
 
     const paidByLoan = new Map<string, { total: number; last: string }>();
     for (const p of payments ?? []) {
