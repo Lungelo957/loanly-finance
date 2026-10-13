@@ -20,7 +20,11 @@ export function AuthLayout({
       <div className="mx-auto flex w-full max-w-md flex-1 flex-col justify-center px-4 py-10">
         <div className="mb-6 flex flex-col items-center gap-2">
           <Link to="/" aria-label="CashFlow home">
+<<<<<<< HEAD
             <FullLogo className="h-20 w-20 sm:h-24 sm:w-24" />
+=======
+            <FullLogo className="w-44 sm:w-52" />
+>>>>>>> fa3c5cea69163a1016824b9ac1a2389d5f99783a
           </Link>
           {portal ? (
             <span className="text-[11px] uppercase tracking-[0.18em] text-muted-foreground">{portal}</span>
