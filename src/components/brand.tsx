@@ -1,11 +1,11 @@
 import { Link } from "@tanstack/react-router";
-import markAsset from "@/assets/cashflow-mark.png.asset.json";
-import fullAsset from "@/assets/cashflow-logo.png.asset.json";
+
+const logoSrc = "/icons/cashflow-icon1.png";
 
 export function Logo({ className = "" }: { className?: string }) {
   return (
     <img
-      src={markAsset.url}
+      src={logoSrc}
       alt="CashFlow"
       className={`inline-block h-9 w-auto object-contain ${className}`}
     />
@@ -15,7 +15,7 @@ export function Logo({ className = "" }: { className?: string }) {
 export function FullLogo({ className = "" }: { className?: string }) {
   return (
     <img
-      src={fullAsset.url}
+      src={logoSrc}
       alt="CashFlow Loan Manager"
       className={`inline-block h-auto object-contain ${className}`}
     />
