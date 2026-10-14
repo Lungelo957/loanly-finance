@@ -186,13 +186,16 @@ export type Database = {
           email: string
           employment: string
           full_name: string
+          home_address: string
           id: string
           id_number: string
           monthly_income: number
           network_borrower_id: string | null
           notes: string
+          other_address: string
           phone: string
           updated_at: string
+          work_address: string
         }
         Insert: {
           address?: string
@@ -202,13 +205,16 @@ export type Database = {
           email?: string
           employment?: string
           full_name: string
+          home_address?: string
           id?: string
           id_number?: string
           monthly_income?: number
           network_borrower_id?: string | null
           notes?: string
+          other_address?: string
           phone?: string
           updated_at?: string
+          work_address?: string
         }
         Update: {
           address?: string
@@ -218,13 +224,16 @@ export type Database = {
           email?: string
           employment?: string
           full_name?: string
+          home_address?: string
           id?: string
           id_number?: string
           monthly_income?: number
           network_borrower_id?: string | null
           notes?: string
+          other_address?: string
           phone?: string
           updated_at?: string
+          work_address?: string
         }
         Relationships: [
           {

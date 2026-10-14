@@ -43,7 +43,9 @@ const blank = {
   full_name: "",
   phone: "",
   email: "",
-  address: "",
+  home_address: "",
+  work_address: "",
+  other_address: "",
   id_number: "",
   employment: "",
   monthly_income: "",
@@ -77,7 +79,9 @@ function BorrowersPage() {
       full_name: b.full_name,
       phone: b.phone,
       email: b.email,
-      address: b.address,
+      home_address: b.home_address || b.address,
+      work_address: b.work_address,
+      other_address: b.other_address,
       id_number: b.id_number,
       employment: b.employment,
       monthly_income: String(b.monthly_income ?? ""),
@@ -98,7 +102,10 @@ function BorrowersPage() {
         full_name: form.full_name.trim(),
         phone: form.phone.trim(),
         email: form.email.trim(),
-        address: form.address.trim(),
+        address: form.home_address.trim(),
+        home_address: form.home_address.trim(),
+        work_address: form.work_address.trim(),
+        other_address: form.other_address.trim(),
         id_number: form.id_number.trim(),
         employment: form.employment.trim(),
         monthly_income: income,
@@ -232,6 +239,9 @@ function BorrowersPage() {
               <dl className="mt-3 space-y-1 text-xs text-muted-foreground">
                 {b.id_number ? <div>ID: {b.id_number}</div> : null}
                 {b.employment ? <div>Work: {b.employment}</div> : null}
+                {b.home_address ? <div className="break-words"><span className="font-medium text-foreground">Home address:</span> {b.home_address}</div> : null}
+                {b.work_address ? <div className="break-words"><span className="font-medium text-foreground">Work address:</span> {b.work_address}</div> : null}
+                {b.other_address ? <div className="break-words"><span className="font-medium text-foreground">Other / Rental address:</span> {b.other_address}</div> : null}
                 <div>Income: {formatCurrency(Number(b.monthly_income))}/month</div>
                 <div>Added {formatDate(b.created_at)}</div>
               </dl>
@@ -266,9 +276,19 @@ function BorrowersPage() {
                 <Input id="b_email" type="email" value={form.email} onChange={set("email")} />
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input id="address" value={form.address} onChange={set("address")} />
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="home_address">Home address</Label>
+                <Input id="home_address" value={form.home_address} onChange={set("home_address")} />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="work_address">Work address</Label>
+                <Input id="work_address" value={form.work_address} onChange={set("work_address")} />
+              </div>
+              <div className="space-y-2 sm:col-span-2">
+                <Label htmlFor="other_address">Other / Rental address</Label>
+                <Input id="other_address" value={form.other_address} onChange={set("other_address")} />
+              </div>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
