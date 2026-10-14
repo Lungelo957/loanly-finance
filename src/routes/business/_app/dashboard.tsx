@@ -143,7 +143,8 @@ function DashboardPage() {
                 <div className="min-w-0">
                   <p className="truncate text-sm font-medium">{loan.borrowers?.full_name ?? "Borrower"}</p>
                   <p className="text-xs text-muted-foreground">
-                    Started {formatDate(loan.start_date)} · {loan.status}
+                    Initial loan {formatDate(loan.start_date)} · promised{" "}
+                    {formatDate(loan.due_date)} · {loan.status}
                   </p>
                 </div>
                 <p className="text-sm font-semibold tabular-nums">{formatCurrency(Number(loan.principal_amount))}</p>

@@ -68,13 +68,17 @@ function LoansPage() {
 
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<LoanWithBorrower | null>(null);
-  const emptyForm = () => ({
-    borrower_id: "",
-    principal_amount: "",
-    interest_rate: String(defaultRate),
-    issue_date: todayISO(),
-    notes: "",
-  });
+  const emptyForm = () => {
+    const issueDate = todayISO();
+    return {
+      borrower_id: "",
+      principal_amount: "",
+      interest_rate: String(defaultRate),
+      issue_date: issueDate,
+      promised_repayment_date: monthEndDueDate(issueDate),
+      notes: "",
+    };
+  };
   const [form, setForm] = useState(emptyForm);
 
   const preview = useMemo(() => {
@@ -99,6 +103,15 @@ function LoansPage() {
       const rate = Number(form.interest_rate);
       if (!Number.isFinite(principal) || principal <= 0) throw new Error("bad-principal");
       if (!Number.isFinite(rate) || rate < 0) throw new Error("bad-rate");
+      const maximumDueDate = monthEndDueDate(form.issue_date);
+      if (
+        !form.issue_date ||
+        !form.promised_repayment_date ||
+        form.promised_repayment_date < form.issue_date ||
+        form.promised_repayment_date > maximumDueDate
+      ) {
+        throw new Error("bad-dates");
+      }
 
       const calc = computeMonthEndLoan(principal, rate, form.issue_date);
 
@@ -112,7 +125,7 @@ function LoansPage() {
           loan_term_months: 1,
           repayment_frequency: "monthly",
           start_date: calc.issueDate,
-          due_date: calc.dueDate,
+          due_date: form.promised_repayment_date,
           total_interest: calc.interestAmount,
           total_repayable: calc.totalRepayable,
           installment_amount: calc.totalRepayable,
@@ -129,7 +142,7 @@ function LoansPage() {
         business_id: businessId,
         loan_id: loan.id,
         installment_number: 1,
-        due_date: calc.dueDate,
+        due_date: form.promised_repayment_date,
         amount_due: calc.totalRepayable,
       });
       if (scheduleError) {
@@ -141,7 +154,7 @@ function LoansPage() {
         business_id: businessId,
         user_id: account?.userId ?? null,
         title: "Loan created",
-        body: `A loan of ${formatCurrency(calc.principal)} is repayable by ${formatDate(calc.dueDate)}.`,
+        body: `A loan of ${formatCurrency(calc.principal)} is repayable by ${formatDate(form.promised_repayment_date)}.`,
       });
       return loan;
     },
@@ -149,13 +162,14 @@ function LoansPage() {
       await invalidate();
       setOpen(false);
       setForm(emptyForm());
-      toast.success("Loan created and due at the end of the month.");
+      toast.success("Loan created with the promised repayment date.");
     },
     onError: (e) => {
       const map: Record<string, string> = {
         "no-borrower": "Choose a borrower first.",
         "bad-principal": "The loan amount must be greater than zero.",
         "bad-rate": "The interest rate can't be negative.",
+        "bad-dates": "Choose a promised repayment date from the initial loan date through month-end.",
       };
       toast.error(map[e.message] ?? friendlyError(e, "We couldn't create this loan."));
     },
@@ -239,7 +253,7 @@ function LoansPage() {
                 <th className="px-4 pb-1 font-medium">Principal</th>
                 <th className="px-4 pb-1 font-medium">Total due</th>
                 <th className="px-4 pb-1 font-medium">Outstanding</th>
-                <th className="px-4 pb-1 font-medium">Due date</th>
+                <th className="px-4 pb-1 font-medium">Promised repayment</th>
                 <th className="px-4 pb-1 font-medium">Status</th>
                 <th className="px-4 pb-1" />
               </tr>
@@ -260,7 +274,7 @@ function LoansPage() {
                     <td className="rounded-l-xl px-4 py-3">
                       <p className="font-medium">{loan.borrowers?.full_name ?? "—"}</p>
                       <p className="text-xs text-muted-foreground">
-                        {Number(loan.interest_rate)}% · issued {formatDate(loan.start_date)}
+                        {Number(loan.interest_rate)}% · initial loan {formatDate(loan.start_date)}
                       </p>
                     </td>
                     <td className="px-4 py-3 tabular-nums">{formatCurrency(Number(loan.principal_amount))}</td>
@@ -344,17 +358,57 @@ function LoansPage() {
                 </p>
               </div>
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="issue">Loan date</Label>
-              <Input
-                id="issue"
-                type="date"
-                value={form.issue_date}
-                onChange={(e) => setForm((f) => ({ ...f, issue_date: e.target.value }))}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Repayable in full on {formatDate(monthEndDueDate(form.issue_date))}.
+            <div className="grid gap-4 sm:grid-cols-2">
+              <div className="space-y-2">
+                <Label htmlFor="issue">Initial loan date</Label>
+                <Input
+                  id="issue"
+                  type="date"
+                  value={form.issue_date}
+                  onChange={(e) => {
+                    const issueDate = e.target.value;
+                    setForm((f) => {
+                      if (!issueDate) {
+                        return { ...f, issue_date: "", promised_repayment_date: "" };
+                      }
+                      const maximumDueDate = monthEndDueDate(issueDate);
+                      const promisedDate =
+                        !f.promised_repayment_date ||
+                        f.promised_repayment_date < issueDate ||
+                        f.promised_repayment_date > maximumDueDate
+                          ? maximumDueDate
+                          : f.promised_repayment_date;
+                      return {
+                        ...f,
+                        issue_date: issueDate,
+                        promised_repayment_date: promisedDate,
+                      };
+                    });
+                  }}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="promised_repayment_date">Promised repayment date</Label>
+                <Input
+                  id="promised_repayment_date"
+                  type="date"
+                  min={form.issue_date || undefined}
+                  max={form.issue_date ? monthEndDueDate(form.issue_date) : undefined}
+                  value={form.promised_repayment_date}
+                  onChange={(e) =>
+                    setForm((f) => ({ ...f, promised_repayment_date: e.target.value }))
+                  }
+                  required
+                />
+              </div>
+              <p className="text-xs text-muted-foreground sm:col-span-2">
+                Promised repayment deadline:{" "}
+                {form.promised_repayment_date
+                  ? formatDate(form.promised_repayment_date)
+                  : "Choose a date"}
+                <br />
+                Choose any date from the initial loan date through month-end (maximum 30 days).
               </p>
             </div>
             <div className="space-y-2">
@@ -377,7 +431,7 @@ function LoansPage() {
                   <li className="font-medium text-foreground">
                     Total repayment: {formatCurrency(preview.totalRepayable)}
                   </li>
-                  <li>Due: {formatDate(preview.dueDate)}</li>
+                  <li>Promised repayment: {formatDate(form.promised_repayment_date)}</li>
                 </ul>
               </div>
             ) : null}
@@ -401,8 +455,11 @@ function LoansPage() {
                 <Info label="Interest rate" value={`${Number(detail.interest_rate)}%`} />
                 <Info label="Interest" value={formatCurrency(Number(detail.total_interest))} />
                 <Info label="Total repayment" value={formatCurrency(Number(detail.total_repayable))} />
-                <Info label="Loan date" value={formatDate(detail.start_date)} />
-                <Info label="Due date" value={detail.due_date ? formatDate(detail.due_date) : "—"} />
+                <Info label="Initial loan date" value={formatDate(detail.start_date)} />
+                <Info
+                  label="Promised repayment date"
+                  value={detail.due_date ? formatDate(detail.due_date) : "—"}
+                />
                 <Info
                   label="Outstanding"
                   value={formatCurrency(
