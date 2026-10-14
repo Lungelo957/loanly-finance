@@ -39,18 +39,34 @@ export function InstallPrompt() {
     setIos(isIos() && !isStandalone());
     setMobile(window.matchMedia("(max-width: 640px)").matches);
     setHidden(isSnoozed() || isStandalone());
-    const t = window.setTimeout(() => setReady(true), 4000);
-    return () => window.clearTimeout(t);
+    setReady(true);
   }, []);
 
-  if (!ready || hidden || installed) return null;
+  if (!ready || installed || isStandalone()) return null;
   const canInstall = !!deferred;
-  if (!canInstall && !ios) return null;
 
   const close = () => {
     snooze();
     setHidden(true);
   };
+
+  const install = async () => {
+    const outcome = await triggerInstall();
+    if (outcome === "accepted") toast.success("CashFlow was installed.");
+    if (outcome === "error") toast.error("CashFlow could not be installed. Try your browser's install menu.");
+  };
+
+  if (hidden) {
+    return (
+      <Button
+        className="fixed bottom-4 right-4 z-50 shadow-lift"
+        onClick={() => setHidden(false)}
+        aria-label={canInstall ? "Install CashFlow" : "How to install CashFlow"}
+      >
+        <Download className="h-4 w-4" /> {canInstall ? "Install CashFlow" : "How to install"}
+      </Button>
+    );
+  }
 
   return (
     <div
@@ -74,10 +90,14 @@ export function InstallPrompt() {
         </div>
 
         {ios ? (
-          <ol className="mt-4 space-y-2.5 text-sm">
+          <>
+            <p className="mt-3 text-sm text-muted-foreground">
+              CashFlow does not show an automatic install popup on iPhone or iPad. Open this page in Safari, then:
+            </p>
+            <ol className="mt-4 space-y-2.5 text-sm">
             <li className="flex items-center gap-2">
               <span className="grid h-5 w-5 place-items-center rounded-full bg-accent text-[11px] font-semibold">1</span>
-              Tap the <Share className="h-4 w-4 text-gold" aria-label="Share" /> Share button in Safari.
+              Tap the <Share className="h-4 w-4 text-gold" aria-label="Share" /> Share button.
             </li>
             <li className="flex items-center gap-2">
               <span className="grid h-5 w-5 place-items-center rounded-full bg-accent text-[11px] font-semibold">2</span>
@@ -87,27 +107,38 @@ export function InstallPrompt() {
               <span className="grid h-5 w-5 place-items-center rounded-full bg-accent text-[11px] font-semibold">3</span>
               Tap Add.
             </li>
-          </ol>
+            </ol>
+          </>
         ) : (
           <>
             <p className="mt-3 text-sm text-muted-foreground">
-              {mobile
-                ? "Install CashFlow on your device for a faster and easier experience."
-                : "Access your CashFlow business system directly from your desktop like a normal application."}
+              {canInstall
+                ? mobile
+                  ? "Install CashFlow on your device for quick access from your home screen."
+                  : "Install CashFlow on your computer for direct access like a normal application."
+                : mobile
+                  ? "Use your browser menu and choose Install app or Add to Home screen, if available."
+                  : "In Chrome or Edge, use the install icon in the address bar or choose Install CashFlow from the browser menu, if available."}
             </p>
-            <ul className="mt-3 space-y-1.5">
-              {BENEFITS.map((b) => (
-                <li key={b} className="flex items-start gap-2 text-sm">
-                  <Check className="mt-0.5 h-4 w-4 shrink-0 text-gold" /> {b}
-                </li>
-              ))}
-            </ul>
+            {canInstall ? (
+              <ul className="mt-3 space-y-1.5">
+                {BENEFITS.map((b) => (
+                  <li key={b} className="flex items-start gap-2 text-sm">
+                    <Check className="mt-0.5 h-4 w-4 shrink-0 text-gold" /> {b}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-2 text-sm text-muted-foreground">
+                Installation options vary by browser. If you do not see one, try an up-to-date Chrome or Edge browser.
+              </p>
+            )}
           </>
         )}
 
         <div className="mt-4 flex flex-col gap-2 sm:flex-row">
           {canInstall ? (
-            <Button className="flex-1" onClick={() => void triggerInstall()}>
+            <Button className="flex-1" onClick={() => void install()}>
               <Download className="h-4 w-4" /> Install CashFlow
             </Button>
           ) : null}

@@ -40,13 +40,20 @@ export function startInstallListener() {
   window.addEventListener("appinstalled", () => set({ deferred: null, installed: true }));
 }
 
-export async function triggerInstall(): Promise<boolean> {
+if (typeof window !== "undefined") startInstallListener();
+
+export async function triggerInstall(): Promise<"accepted" | "dismissed" | "unavailable" | "error"> {
   const d = state.deferred;
-  if (!d) return false;
-  await d.prompt();
-  const { outcome } = await d.userChoice;
-  set({ deferred: null, installed: outcome === "accepted" || state.installed });
-  return outcome === "accepted";
+  if (!d) return "unavailable";
+  try {
+    await d.prompt();
+    const { outcome } = await d.userChoice;
+    set({ deferred: null, installed: outcome === "accepted" || state.installed });
+    return outcome;
+  } catch {
+    set({ deferred: null });
+    return "error";
+  }
 }
 
 const SERVER: State = { deferred: null, installed: false };

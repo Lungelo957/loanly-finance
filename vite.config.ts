@@ -21,7 +21,7 @@ export default defineConfig({
         injectRegister: null, // src/lib/pwa-register.ts is the only registrar
         manifest: false, // public/manifest.webmanifest is the single manifest
         filename: "sw.js",
-        outDir: "dist/client", // served root of the published site
+        outDir: ".output/public", // Nitro's published static asset directory
         devOptions: { enabled: false },
         workbox: {
           // Never cache HTML pages or API/Supabase data — only hashed static files.
