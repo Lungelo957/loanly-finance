@@ -21,12 +21,14 @@ export function AppShell({
   portal,
   userLabel,
   signOutTo,
+  headerAction,
   children,
 }: {
   items: NavItem[];
   portal: string;
   userLabel: string;
   signOutTo: string;
+  headerAction?: ReactNode;
   children: ReactNode;
 }) {
   const [open, setOpen] = useState(false);
@@ -145,9 +147,12 @@ export function AppShell({
               <p className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{portal}</p>
               <p className="truncate text-sm font-medium">{current?.label ?? ""}</p>
             </div>
-            <div className="ml-auto hidden items-center gap-3 lg:flex">
-              <span className="max-w-[220px] truncate text-xs text-muted-foreground">{userLabel}</span>
-              <span className="grid h-8 w-8 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-foreground">
+            <div className="ml-auto flex items-center gap-3">
+              {headerAction}
+              <span className="hidden max-w-[220px] truncate text-xs text-muted-foreground lg:block">
+                {userLabel}
+              </span>
+              <span className="hidden h-8 w-8 place-items-center rounded-full bg-accent text-xs font-semibold text-accent-foreground lg:grid">
                 {initial}
               </span>
             </div>

@@ -21,6 +21,7 @@ import { Route as BusinessAppRouteRouteImport } from './routes/business/_app/rou
 import { Route as BusinessLoginRouteImport } from './routes/business/login'
 import { Route as BusinessPendingRouteImport } from './routes/business/pending'
 import { Route as BusinessRegisterRouteImport } from './routes/business/register'
+import { Route as AdminAppAnnouncementsRouteImport } from './routes/admin/_app/announcements'
 import { Route as AdminAppBusinessesRouteImport } from './routes/admin/_app/businesses'
 import { Route as AdminAppDashboardRouteImport } from './routes/admin/_app/dashboard'
 import { Route as AdminAppReliabilityRouteImport } from './routes/admin/_app/reliability'
@@ -32,6 +33,7 @@ import { Route as BusinessAppCollectionsRouteImport } from './routes/business/_a
 import { Route as BusinessAppDashboardRouteImport } from './routes/business/_app/dashboard'
 import { Route as BusinessAppExpensesRouteImport } from './routes/business/_app/expenses'
 import { Route as BusinessAppLoansRouteImport } from './routes/business/_app/loans'
+import { Route as BusinessAppNotificationsRouteImport } from './routes/business/_app/notifications'
 import { Route as BusinessAppPaymentsRouteImport } from './routes/business/_app/payments'
 import { Route as BusinessAppReliabilityRouteImport } from './routes/business/_app/reliability'
 import { Route as BusinessAppReportsRouteImport } from './routes/business/_app/reports'
@@ -97,6 +99,11 @@ const BusinessRegisterRoute = BusinessRegisterRouteImport.update({
   path: '/register',
   getParentRoute: () => BusinessRouteRoute,
 } as any)
+const AdminAppAnnouncementsRoute = AdminAppAnnouncementsRouteImport.update({
+  id: '/announcements',
+  path: '/announcements',
+  getParentRoute: () => AdminAppRouteRoute,
+} as any)
 const AdminAppBusinessesRoute = AdminAppBusinessesRouteImport.update({
   id: '/businesses',
   path: '/businesses',
@@ -152,6 +159,12 @@ const BusinessAppLoansRoute = BusinessAppLoansRouteImport.update({
   path: '/loans',
   getParentRoute: () => BusinessAppRouteRoute,
 } as any)
+const BusinessAppNotificationsRoute =
+  BusinessAppNotificationsRouteImport.update({
+    id: '/notifications',
+    path: '/notifications',
+    getParentRoute: () => BusinessAppRouteRoute,
+  } as any)
 const BusinessAppPaymentsRoute = BusinessAppPaymentsRouteImport.update({
   id: '/payments',
   path: '/payments',
@@ -195,6 +208,7 @@ export interface FileRoutesByFullPath {
   '/business/register': typeof BusinessRegisterRoute
   '/admin/': typeof AdminIndexRoute
   '/business/': typeof BusinessIndexRoute
+  '/admin/announcements': typeof AdminAppAnnouncementsRoute
   '/admin/businesses': typeof AdminAppBusinessesRoute
   '/admin/dashboard': typeof AdminAppDashboardRoute
   '/admin/reliability': typeof AdminAppReliabilityRoute
@@ -206,6 +220,7 @@ export interface FileRoutesByFullPath {
   '/business/dashboard': typeof BusinessAppDashboardRoute
   '/business/expenses': typeof BusinessAppExpensesRoute
   '/business/loans': typeof BusinessAppLoansRoute
+  '/business/notifications': typeof BusinessAppNotificationsRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
   '/business/reliability': typeof BusinessAppReliabilityRoute
   '/business/reports': typeof BusinessAppReportsRoute
@@ -222,6 +237,7 @@ export interface FileRoutesByTo {
   '/business/login': typeof BusinessLoginRoute
   '/business/pending': typeof BusinessPendingRoute
   '/business/register': typeof BusinessRegisterRoute
+  '/admin/announcements': typeof AdminAppAnnouncementsRoute
   '/admin/businesses': typeof AdminAppBusinessesRoute
   '/admin/dashboard': typeof AdminAppDashboardRoute
   '/admin/reliability': typeof AdminAppReliabilityRoute
@@ -233,6 +249,7 @@ export interface FileRoutesByTo {
   '/business/dashboard': typeof BusinessAppDashboardRoute
   '/business/expenses': typeof BusinessAppExpensesRoute
   '/business/loans': typeof BusinessAppLoansRoute
+  '/business/notifications': typeof BusinessAppNotificationsRoute
   '/business/payments': typeof BusinessAppPaymentsRoute
   '/business/reliability': typeof BusinessAppReliabilityRoute
   '/business/reports': typeof BusinessAppReportsRoute
@@ -254,6 +271,7 @@ export interface FileRoutesById {
   '/business/register': typeof BusinessRegisterRoute
   '/admin/': typeof AdminIndexRoute
   '/business/': typeof BusinessIndexRoute
+  '/admin/_app/announcements': typeof AdminAppAnnouncementsRoute
   '/admin/_app/businesses': typeof AdminAppBusinessesRoute
   '/admin/_app/dashboard': typeof AdminAppDashboardRoute
   '/admin/_app/reliability': typeof AdminAppReliabilityRoute
@@ -265,6 +283,7 @@ export interface FileRoutesById {
   '/business/_app/dashboard': typeof BusinessAppDashboardRoute
   '/business/_app/expenses': typeof BusinessAppExpensesRoute
   '/business/_app/loans': typeof BusinessAppLoansRoute
+  '/business/_app/notifications': typeof BusinessAppNotificationsRoute
   '/business/_app/payments': typeof BusinessAppPaymentsRoute
   '/business/_app/reliability': typeof BusinessAppReliabilityRoute
   '/business/_app/reports': typeof BusinessAppReportsRoute
@@ -285,6 +304,7 @@ export interface FileRouteTypes {
     | '/business/register'
     | '/admin/'
     | '/business/'
+    | '/admin/announcements'
     | '/admin/businesses'
     | '/admin/dashboard'
     | '/admin/reliability'
@@ -296,6 +316,7 @@ export interface FileRouteTypes {
     | '/business/dashboard'
     | '/business/expenses'
     | '/business/loans'
+    | '/business/notifications'
     | '/business/payments'
     | '/business/reliability'
     | '/business/reports'
@@ -312,6 +333,7 @@ export interface FileRouteTypes {
     | '/business/login'
     | '/business/pending'
     | '/business/register'
+    | '/admin/announcements'
     | '/admin/businesses'
     | '/admin/dashboard'
     | '/admin/reliability'
@@ -323,6 +345,7 @@ export interface FileRouteTypes {
     | '/business/dashboard'
     | '/business/expenses'
     | '/business/loans'
+    | '/business/notifications'
     | '/business/payments'
     | '/business/reliability'
     | '/business/reports'
@@ -343,6 +366,7 @@ export interface FileRouteTypes {
     | '/business/register'
     | '/admin/'
     | '/business/'
+    | '/admin/_app/announcements'
     | '/admin/_app/businesses'
     | '/admin/_app/dashboard'
     | '/admin/_app/reliability'
@@ -354,6 +378,7 @@ export interface FileRouteTypes {
     | '/business/_app/dashboard'
     | '/business/_app/expenses'
     | '/business/_app/loans'
+    | '/business/_app/notifications'
     | '/business/_app/payments'
     | '/business/_app/reliability'
     | '/business/_app/reports'
@@ -455,6 +480,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessRegisterRouteImport
       parentRoute: typeof BusinessRouteRoute
     }
+    '/admin/_app/announcements': {
+      id: '/admin/_app/announcements'
+      path: '/announcements'
+      fullPath: '/admin/announcements'
+      preLoaderRoute: typeof AdminAppAnnouncementsRouteImport
+      parentRoute: typeof AdminAppRouteRoute
+    }
     '/admin/_app/businesses': {
       id: '/admin/_app/businesses'
       path: '/businesses'
@@ -532,6 +564,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessAppLoansRouteImport
       parentRoute: typeof BusinessAppRouteRoute
     }
+    '/business/_app/notifications': {
+      id: '/business/_app/notifications'
+      path: '/notifications'
+      fullPath: '/business/notifications'
+      preLoaderRoute: typeof BusinessAppNotificationsRouteImport
+      parentRoute: typeof BusinessAppRouteRoute
+    }
     '/business/_app/payments': {
       id: '/business/_app/payments'
       path: '/payments'
@@ -578,6 +617,7 @@ declare module '@tanstack/react-router' {
 }
 
 interface AdminAppRouteRouteChildren {
+  AdminAppAnnouncementsRoute: typeof AdminAppAnnouncementsRoute
   AdminAppBusinessesRoute: typeof AdminAppBusinessesRoute
   AdminAppDashboardRoute: typeof AdminAppDashboardRoute
   AdminAppReliabilityRoute: typeof AdminAppReliabilityRoute
@@ -585,6 +625,7 @@ interface AdminAppRouteRouteChildren {
 }
 
 const AdminAppRouteRouteChildren: AdminAppRouteRouteChildren = {
+  AdminAppAnnouncementsRoute: AdminAppAnnouncementsRoute,
   AdminAppBusinessesRoute: AdminAppBusinessesRoute,
   AdminAppDashboardRoute: AdminAppDashboardRoute,
   AdminAppReliabilityRoute: AdminAppReliabilityRoute,
@@ -630,6 +671,7 @@ interface BusinessAppRouteRouteChildren {
   BusinessAppDashboardRoute: typeof BusinessAppDashboardRoute
   BusinessAppExpensesRoute: typeof BusinessAppExpensesRoute
   BusinessAppLoansRoute: typeof BusinessAppLoansRoute
+  BusinessAppNotificationsRoute: typeof BusinessAppNotificationsRoute
   BusinessAppPaymentsRoute: typeof BusinessAppPaymentsRoute
   BusinessAppReliabilityRoute: typeof BusinessAppReliabilityRoute
   BusinessAppReportsRoute: typeof BusinessAppReportsRoute
@@ -645,6 +687,7 @@ const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
   BusinessAppDashboardRoute: BusinessAppDashboardRoute,
   BusinessAppExpensesRoute: BusinessAppExpensesRoute,
   BusinessAppLoansRoute: BusinessAppLoansRoute,
+  BusinessAppNotificationsRoute: BusinessAppNotificationsRoute,
   BusinessAppPaymentsRoute: BusinessAppPaymentsRoute,
   BusinessAppReliabilityRoute: BusinessAppReliabilityRoute,
   BusinessAppReportsRoute: BusinessAppReportsRoute,

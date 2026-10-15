@@ -2,6 +2,7 @@ import { createFileRoute, Outlet } from "@tanstack/react-router";
 import {
   BarChart3,
   Banknote,
+  Bell,
   FileText,
   HandCoins,
   LayoutDashboard,
@@ -16,12 +17,14 @@ import {
 import { AppShell, type NavItem } from "@/components/app-shell";
 import { requireBusinessAccess } from "@/lib/guards";
 import { useAccount } from "@/lib/account";
+import { BusinessNotificationBell } from "@/components/business-notification-bell";
 
 const items: NavItem[] = [
   { to: "/business/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { to: "/business/borrowers", label: "Borrowers", icon: Users },
   { to: "/business/loans", label: "Loans", icon: HandCoins },
   { to: "/business/payments", label: "Payments", icon: Banknote },
+  { to: "/business/notifications", label: "Notifications", icon: Bell },
   { to: "/business/capital", label: "Capital", icon: Wallet },
   { to: "/business/collections", label: "Collections", icon: Receipt },
   { to: "/business/expenses", label: "Expenses", icon: ScrollText },
@@ -45,6 +48,7 @@ function BusinessWorkspace() {
       portal={account?.business?.name ?? "Business portal"}
       userLabel={account?.email ?? ""}
       signOutTo="/business/login"
+      headerAction={<BusinessNotificationBell />}
     >
       <Outlet />
     </AppShell>

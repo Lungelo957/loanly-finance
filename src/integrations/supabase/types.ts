@@ -113,6 +113,95 @@ export type Database = {
           },
         ]
       }
+      announcements: {
+        Row: {
+          archived_at: string | null
+          audience_type: string
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+          published_at: string | null
+          status: string
+          target_business_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          audience_type: string
+          category: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          message: string
+          published_at?: string | null
+          status?: string
+          target_business_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          audience_type?: string
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+          published_at?: string | null
+          status?: string
+          target_business_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_target_business_id_fkey"
+            columns: ["target_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcement_recipients: {
+        Row: {
+          announcement_id: string
+          business_id: string
+          created_at: string
+          read_at: string | null
+        }
+        Insert: {
+          announcement_id: string
+          business_id: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Update: {
+          announcement_id?: string
+          business_id?: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_recipients_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_recipients_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       borrower_consents: {
         Row: {
           borrower_id: string
@@ -811,6 +900,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_archive_announcement: {
+        Args: { _announcement_id: string }
+        Returns: undefined
+      }
+      admin_publish_announcement: {
+        Args: { _announcement_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
