@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -33,6 +33,9 @@ import { computeMonthEndLoan, loanDisplayStatus, monthEndDueDate } from "@/lib/f
 import { formatCurrency, formatDate, todayISO } from "@/lib/format";
 
 export const Route = createFileRoute("/business/_app/loans")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    loan: typeof search.loan === "string" ? search.loan : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Loans — CashFlow" },
@@ -65,9 +68,19 @@ function LoansPage() {
   const loans = useLoans(businessId);
   const repayments = useRepayments(businessId);
   const payments = usePayments(businessId);
+  const searchParams = Route.useSearch();
+  const navigate = Route.useNavigate();
 
   const [open, setOpen] = useState(false);
   const [detail, setDetail] = useState<LoanWithBorrower | null>(null);
+
+  useEffect(() => {
+    if (!searchParams.loan || !loans.isSuccess) return;
+    const selectedLoan = loans.data.find((loan) => loan.id === searchParams.loan);
+    if (selectedLoan) setDetail(selectedLoan);
+    void navigate({ search: (previous) => ({ ...previous, loan: undefined }), replace: true });
+  }, [loans.data, loans.isSuccess, navigate, searchParams.loan]);
+
   const emptyForm = () => {
     const issueDate = todayISO();
     return {

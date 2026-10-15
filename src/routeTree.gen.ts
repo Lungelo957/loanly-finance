@@ -37,6 +37,7 @@ import { Route as BusinessAppReliabilityRouteImport } from './routes/business/_a
 import { Route as BusinessAppReportsRouteImport } from './routes/business/_app/reports'
 import { Route as BusinessAppSettingsRouteImport } from './routes/business/_app/settings'
 import { Route as BusinessAppSupportRouteImport } from './routes/business/_app/support'
+import { Route as BusinessAppBorrowersBorrowerIdRouteImport } from './routes/business/_app/borrowers.$borrowerId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -176,6 +177,12 @@ const BusinessAppSupportRoute = BusinessAppSupportRouteImport.update({
   path: '/support',
   getParentRoute: () => BusinessAppRouteRoute,
 } as any)
+const BusinessAppBorrowersBorrowerIdRoute =
+  BusinessAppBorrowersBorrowerIdRouteImport.update({
+    id: '/$borrowerId',
+    path: '/$borrowerId',
+    getParentRoute: () => BusinessAppBorrowersRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -193,7 +200,7 @@ export interface FileRoutesByFullPath {
   '/admin/reliability': typeof AdminAppReliabilityRoute
   '/admin/support': typeof AdminAppSupportRoute
   '/business/agreements': typeof BusinessAppAgreementsRoute
-  '/business/borrowers': typeof BusinessAppBorrowersRoute
+  '/business/borrowers': typeof BusinessAppBorrowersRouteWithChildren
   '/business/capital': typeof BusinessAppCapitalRoute
   '/business/collections': typeof BusinessAppCollectionsRoute
   '/business/dashboard': typeof BusinessAppDashboardRoute
@@ -204,6 +211,7 @@ export interface FileRoutesByFullPath {
   '/business/reports': typeof BusinessAppReportsRoute
   '/business/settings': typeof BusinessAppSettingsRoute
   '/business/support': typeof BusinessAppSupportRoute
+  '/business/borrowers/$borrowerId': typeof BusinessAppBorrowersBorrowerIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -219,7 +227,7 @@ export interface FileRoutesByTo {
   '/admin/reliability': typeof AdminAppReliabilityRoute
   '/admin/support': typeof AdminAppSupportRoute
   '/business/agreements': typeof BusinessAppAgreementsRoute
-  '/business/borrowers': typeof BusinessAppBorrowersRoute
+  '/business/borrowers': typeof BusinessAppBorrowersRouteWithChildren
   '/business/capital': typeof BusinessAppCapitalRoute
   '/business/collections': typeof BusinessAppCollectionsRoute
   '/business/dashboard': typeof BusinessAppDashboardRoute
@@ -230,6 +238,7 @@ export interface FileRoutesByTo {
   '/business/reports': typeof BusinessAppReportsRoute
   '/business/settings': typeof BusinessAppSettingsRoute
   '/business/support': typeof BusinessAppSupportRoute
+  '/business/borrowers/$borrowerId': typeof BusinessAppBorrowersBorrowerIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -250,7 +259,7 @@ export interface FileRoutesById {
   '/admin/_app/reliability': typeof AdminAppReliabilityRoute
   '/admin/_app/support': typeof AdminAppSupportRoute
   '/business/_app/agreements': typeof BusinessAppAgreementsRoute
-  '/business/_app/borrowers': typeof BusinessAppBorrowersRoute
+  '/business/_app/borrowers': typeof BusinessAppBorrowersRouteWithChildren
   '/business/_app/capital': typeof BusinessAppCapitalRoute
   '/business/_app/collections': typeof BusinessAppCollectionsRoute
   '/business/_app/dashboard': typeof BusinessAppDashboardRoute
@@ -261,6 +270,7 @@ export interface FileRoutesById {
   '/business/_app/reports': typeof BusinessAppReportsRoute
   '/business/_app/settings': typeof BusinessAppSettingsRoute
   '/business/_app/support': typeof BusinessAppSupportRoute
+  '/business/_app/borrowers/$borrowerId': typeof BusinessAppBorrowersBorrowerIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -291,6 +301,7 @@ export interface FileRouteTypes {
     | '/business/reports'
     | '/business/settings'
     | '/business/support'
+    | '/business/borrowers/$borrowerId'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -317,6 +328,7 @@ export interface FileRouteTypes {
     | '/business/reports'
     | '/business/settings'
     | '/business/support'
+    | '/business/borrowers/$borrowerId'
   id:
     | '__root__'
     | '/'
@@ -347,6 +359,7 @@ export interface FileRouteTypes {
     | '/business/_app/reports'
     | '/business/_app/settings'
     | '/business/_app/support'
+    | '/business/_app/borrowers/$borrowerId'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -554,6 +567,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof BusinessAppSupportRouteImport
       parentRoute: typeof BusinessAppRouteRoute
     }
+    '/business/_app/borrowers/$borrowerId': {
+      id: '/business/_app/borrowers/$borrowerId'
+      path: '/$borrowerId'
+      fullPath: '/business/borrowers/$borrowerId'
+      preLoaderRoute: typeof BusinessAppBorrowersBorrowerIdRouteImport
+      parentRoute: typeof BusinessAppBorrowersRoute
+    }
   }
 }
 
@@ -591,9 +611,20 @@ const AdminRouteRouteWithChildren = AdminRouteRoute._addFileChildren(
   AdminRouteRouteChildren,
 )
 
+interface BusinessAppBorrowersRouteChildren {
+  BusinessAppBorrowersBorrowerIdRoute: typeof BusinessAppBorrowersBorrowerIdRoute
+}
+
+const BusinessAppBorrowersRouteChildren: BusinessAppBorrowersRouteChildren = {
+  BusinessAppBorrowersBorrowerIdRoute: BusinessAppBorrowersBorrowerIdRoute,
+}
+
+const BusinessAppBorrowersRouteWithChildren =
+  BusinessAppBorrowersRoute._addFileChildren(BusinessAppBorrowersRouteChildren)
+
 interface BusinessAppRouteRouteChildren {
   BusinessAppAgreementsRoute: typeof BusinessAppAgreementsRoute
-  BusinessAppBorrowersRoute: typeof BusinessAppBorrowersRoute
+  BusinessAppBorrowersRoute: typeof BusinessAppBorrowersRouteWithChildren
   BusinessAppCapitalRoute: typeof BusinessAppCapitalRoute
   BusinessAppCollectionsRoute: typeof BusinessAppCollectionsRoute
   BusinessAppDashboardRoute: typeof BusinessAppDashboardRoute
@@ -608,7 +639,7 @@ interface BusinessAppRouteRouteChildren {
 
 const BusinessAppRouteRouteChildren: BusinessAppRouteRouteChildren = {
   BusinessAppAgreementsRoute: BusinessAppAgreementsRoute,
-  BusinessAppBorrowersRoute: BusinessAppBorrowersRoute,
+  BusinessAppBorrowersRoute: BusinessAppBorrowersRouteWithChildren,
   BusinessAppCapitalRoute: BusinessAppCapitalRoute,
   BusinessAppCollectionsRoute: BusinessAppCollectionsRoute,
   BusinessAppDashboardRoute: BusinessAppDashboardRoute,

@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { createFileRoute } from "@tanstack/react-router";
+import { useEffect, useMemo, useState } from "react";
+import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, Users } from "lucide-react";
@@ -26,6 +26,9 @@ import { friendlyError, useBorrowers, useBusinessInvalidate, type Borrower } fro
 import { formatCurrency, formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/business/_app/borrowers")({
+  validateSearch: (search: Record<string, unknown>) => ({
+    edit: typeof search.edit === "string" ? search.edit : undefined,
+  }),
   head: () => ({
     meta: [
       { title: "Borrowers — CashFlow" },
@@ -53,10 +56,15 @@ const blank = {
 };
 
 function BorrowersPage() {
+  const isNestedRoute = useRouterState({
+    select: (state) => state.location.pathname !== "/business/borrowers",
+  });
   const { data: account } = useAccount();
   const businessId = account?.business?.id;
   const invalidate = useBusinessInvalidate(businessId);
   const borrowers = useBorrowers(businessId);
+  const searchParams = Route.useSearch();
+  const navigate = Route.useNavigate();
 
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -89,6 +97,13 @@ function BorrowersPage() {
     });
     setOpen(true);
   }
+
+  useEffect(() => {
+    if (!searchParams.edit || !borrowers.data) return;
+    const borrower = borrowers.data.find((b) => b.id === searchParams.edit);
+    if (borrower) openEdit(borrower);
+    void navigate({ search: (previous) => ({ ...previous, edit: undefined }), replace: true });
+  }, [borrowers.data, navigate, searchParams.edit]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -175,6 +190,8 @@ function BorrowersPage() {
     );
   }, [borrowers.data, search]);
 
+  if (isNestedRoute) return <Outlet />;
+
   return (
     <div>
       <PageHeader
@@ -224,7 +241,13 @@ function BorrowersPage() {
             <div key={b.id} className="card-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <p className="truncate font-semibold">{b.full_name}</p>
+                  <Link
+                    to="/business/borrowers/$borrowerId"
+                    params={{ borrowerId: b.id }}
+                    className="block truncate font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  >
+                    {b.full_name}
+                  </Link>
                   <p className="truncate text-sm text-muted-foreground">{b.phone || b.email || "No contact"}</p>
                 </div>
                 <div className="flex gap-1">
