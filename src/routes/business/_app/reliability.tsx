@@ -28,7 +28,8 @@ export const Route = createFileRoute("/business/_app/reliability")({
       { title: "Borrower reliability — CashFlow" },
       {
         name: "description",
-        content: "Check a borrower's repayment reliability across participating CashFlow businesses.",
+        content:
+          "Check a borrower's repayment reliability across participating CashFlow businesses.",
       },
       { property: "og:title", content: "Borrower reliability — CashFlow" },
       {
@@ -48,6 +49,18 @@ const LEVEL_TONE: Record<string, string> = {
   fair: "bg-amber-100 text-amber-900",
   poor: "bg-orange-100 text-orange-900",
   high_risk: "bg-red-100 text-red-800",
+};
+
+const reliabilityActionError = (error: unknown, fallback: string) => {
+  const message = error instanceof Error ? error.message : "";
+  if (
+    /only an active member|borrower not found|search limit reached|add an identity number/i.test(
+      message,
+    )
+  ) {
+    return message;
+  }
+  return friendlyError(error, fallback);
 };
 
 function ReliabilityPage() {
@@ -87,9 +100,11 @@ function ReliabilityPage() {
     onSuccess: async (r) => {
       setResult(null);
       await queryClient.invalidateQueries({ queryKey: ["business", businessId, "consents"] });
-      toast.success(`Data-sharing preference recorded as ${CONSENT_LABEL[r.status as ConsentStatus]}.`);
+      toast.success(
+        `Data-sharing preference recorded as ${CONSENT_LABEL[r.status as ConsentStatus]}.`,
+      );
     },
-    onError: (e) => toast.error(friendlyError(e, "We couldn't record that consent.")),
+    onError: (e) => toast.error(reliabilityActionError(e, "We couldn't record that consent.")),
   });
 
   const check = useMutation({
@@ -98,7 +113,8 @@ function ReliabilityPage() {
       return runCheck({ data: { borrowerId } });
     },
     onSuccess: (r) => setResult(r),
-    onError: (e) => toast.error(friendlyError(e, "We couldn't complete the reliability check.")),
+    onError: (e) =>
+      toast.error(reliabilityActionError(e, "We couldn't complete the reliability check.")),
   });
 
   if (isLoading) return <LoadingState label="Loading borrowers..." />;
@@ -146,8 +162,18 @@ function ReliabilityPage() {
               <div className="rounded-md border border-border/70 p-3 text-sm">
                 <span className="text-muted-foreground">Data sharing preference: </span>
                 <span className="font-medium">
-                  {CONSENT_LABEL[consentFor(borrowerId) ?? "pending"]}
+                  {consents.isLoading
+                    ? "Loading..."
+                    : consents.isError
+                      ? "Unavailable"
+                      : CONSENT_LABEL[consentFor(borrowerId) ?? "pending"]}
                 </span>
+                {consents.isError ? (
+                  <p className="mt-1 text-xs text-destructive">
+                    Consent status could not be loaded. The server will verify it before returning
+                    results.
+                  </p>
+                ) : null}
               </div>
             ) : null}
 
@@ -188,8 +214,8 @@ function ReliabilityPage() {
             </div>
 
             <p className="text-xs text-muted-foreground">
-              Only record consent you have genuinely obtained from the borrower. Recording it here is a
-              technical control, not legal advice.
+              Only record consent you have genuinely obtained from the borrower. Recording it here
+              is a technical control, not legal advice.
             </p>
 
             <Button
@@ -221,15 +247,36 @@ function ReliabilityPage() {
                 <p className="text-sm text-muted-foreground">{result.explanation}</p>
                 <dl className="grid grid-cols-2 gap-3 text-sm">
                   <Metric label="Completed loans" value={result.metrics.completedLoans} />
-                  <Metric label="On-time repayments" value={result.metrics.paidOnTime} />
-                  <Metric label="Late repayments" value={result.metrics.paidLate} />
+                  <Metric
+                    label="Completed repayment obligations"
+                    value={result.metrics.completedRepayments}
+                  />
+                  <Metric label="On-time installments" value={result.metrics.paidOnTime} />
+                  <Metric label="Late installments" value={result.metrics.paidLate} />
                   <Metric label="On-time rate" value={`${result.metrics.onTimeRate}%`} />
-                  <Metric label="Current active obligations" value={result.metrics.activeObligations} />
+                  <Metric
+                    label="Participating lenders with outstanding loans"
+                    value={result.metrics.participatingLenders}
+                  />
+                  <Metric
+                    label="Outstanding loan obligations"
+                    value={result.metrics.outstandingObligations}
+                  />
+                  <Metric
+                    label="Current, not overdue obligations"
+                    value={result.metrics.activeObligations}
+                  />
                   <Metric
                     label="Current overdue obligations"
                     value={result.metrics.overdueObligations}
                   />
                 </dl>
+                <p className="text-xs text-muted-foreground">
+                  Each non-cancelled loan with a positive remaining balance counts as one
+                  outstanding obligation. A lender is counted once, even when reporting multiple
+                  loans. Repayment indicators count scheduled installments completed from recorded
+                  payments.
+                </p>
                 <p className="text-xs text-muted-foreground">Data sharing: Authorized</p>
               </div>
             )}
