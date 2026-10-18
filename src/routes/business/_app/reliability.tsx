@@ -54,7 +54,7 @@ const LEVEL_TONE: Record<string, string> = {
 const reliabilityActionError = (error: unknown, fallback: string) => {
   const message = error instanceof Error ? error.message : "";
   if (
-    /only an active member|borrower not found|search limit reached|add an identity number/i.test(
+    /only an active member|borrower not found|search limit reached|add an identity number|consent could not be recorded/i.test(
       message,
     )
   ) {

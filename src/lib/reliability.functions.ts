@@ -54,6 +54,41 @@ async function borrowerFingerprint(borrower: {
   return null;
 }
 
+function consentOperationFailure(operation: string, error: unknown): Error {
+  const message = error instanceof Error ? error.message : "";
+  const missingVariables = message.match(
+    /Missing Supabase environment variable\(s\): ([A-Z_, ]+)/i,
+  )?.[1];
+  if (missingVariables) {
+    console.error("[Reliability] Consent server configuration is incomplete", {
+      operation,
+      variables: missingVariables.split(", ").map((name) => name.trim()),
+    });
+    return new Error(
+      `Consent could not be recorded: server configuration is missing ${missingVariables}.`,
+    );
+  }
+
+  const code =
+    typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
+      ? error.code
+      : undefined;
+  console.error("[Reliability] Consent persistence failed", { operation, code: code ?? "unknown" });
+  return new Error(
+    `Consent could not be recorded while ${operation}${code ? ` (Supabase error ${code})` : ""}.`,
+  );
+}
+
+async function getConsentAdminClient() {
+  try {
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    void supabaseAdmin.auth;
+    return supabaseAdmin;
+  } catch (error) {
+    throw consentOperationFailure("initializing the secure database client", error);
+  }
+}
+
 /** Records / updates the data-sharing consent for one of the caller's own borrowers. */
 export const recordBorrowerConsent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -72,13 +107,14 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
       .select("id, business_id, id_number, phone, email, network_borrower_id")
       .eq("id", data.borrowerId)
       .maybeSingle();
-    if (error) throw new Error(error.message);
+    if (error) throw consentOperationFailure("loading the selected borrower", error);
     if (!borrower) throw new Error("Borrower not found.");
     const { data: isActiveMember, error: membershipError } = await supabase.rpc(
       "is_active_business_member",
       { _business_id: borrower.business_id },
     );
-    if (membershipError) throw new Error(membershipError.message);
+    if (membershipError)
+      throw consentOperationFailure("verifying active business membership", membershipError);
     if (!isActiveMember)
       throw new Error("Only an active member of this borrower's business can record consent.");
 
@@ -91,24 +127,26 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
           "Add an identity number, phone number or email to this borrower before recording consent.",
         );
       }
-      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const supabaseAdmin = await getConsentAdminClient();
       const existing = await supabaseAdmin
         .from("network_borrowers")
         .upsert({ identifier_hash: hash }, { onConflict: "identifier_hash" })
         .select("id")
         .single();
-      if (existing.error) throw new Error(existing.error.message);
+      if (existing.error)
+        throw consentOperationFailure("creating the shared borrower identity", existing.error);
       networkBorrowerId = existing.data.id;
       const linked = await supabaseAdmin
         .from("borrowers")
         .update({ network_borrower_id: networkBorrowerId })
         .eq("id", borrower.id)
         .eq("business_id", borrower.business_id);
-      if (linked.error) throw new Error(linked.error.message);
+      if (linked.error)
+        throw consentOperationFailure("linking the borrower to the shared identity", linked.error);
     }
 
     const now = new Date().toISOString();
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+    const supabaseAdmin = await getConsentAdminClient();
     const { error: upsertError } = await supabaseAdmin.from("borrower_consents").upsert(
       {
         business_id: borrower.business_id,
@@ -122,7 +160,7 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
       },
       { onConflict: "borrower_id" },
     );
-    if (upsertError) throw new Error(upsertError.message);
+    if (upsertError) throw consentOperationFailure("saving the consent record", upsertError);
 
     return { ok: true, status: data.status };
   });
