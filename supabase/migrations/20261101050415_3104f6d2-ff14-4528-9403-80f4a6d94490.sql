@@ -1,0 +1,1 @@
+GRANT INSERT, UPDATE ON public.borrower_consents TO authenticated;
