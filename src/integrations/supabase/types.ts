@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -113,6 +113,95 @@ export type Database = {
           },
         ]
       }
+      announcement_recipients: {
+        Row: {
+          announcement_id: string
+          business_id: string
+          created_at: string
+          read_at: string | null
+        }
+        Insert: {
+          announcement_id: string
+          business_id: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Update: {
+          announcement_id?: string
+          business_id?: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_recipients_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_recipients_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      announcements: {
+        Row: {
+          archived_at: string | null
+          audience_type: string
+          category: string
+          created_at: string
+          created_by: string
+          id: string
+          message: string
+          published_at: string | null
+          status: string
+          target_business_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          archived_at?: string | null
+          audience_type: string
+          category: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          message: string
+          published_at?: string | null
+          status?: string
+          target_business_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          archived_at?: string | null
+          audience_type?: string
+          category?: string
+          created_at?: string
+          created_by?: string
+          id?: string
+          message?: string
+          published_at?: string | null
+          status?: string
+          target_business_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcements_target_business_id_fkey"
+            columns: ["target_business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       borrower_consents: {
         Row: {
           borrower_id: string
@@ -186,13 +275,16 @@ export type Database = {
           email: string
           employment: string
           full_name: string
+          home_address: string
           id: string
           id_number: string
           monthly_income: number
           network_borrower_id: string | null
           notes: string
+          other_address: string
           phone: string
           updated_at: string
+          work_address: string
         }
         Insert: {
           address?: string
@@ -202,13 +294,16 @@ export type Database = {
           email?: string
           employment?: string
           full_name: string
+          home_address?: string
           id?: string
           id_number?: string
           monthly_income?: number
           network_borrower_id?: string | null
           notes?: string
+          other_address?: string
           phone?: string
           updated_at?: string
+          work_address?: string
         }
         Update: {
           address?: string
@@ -218,13 +313,16 @@ export type Database = {
           email?: string
           employment?: string
           full_name?: string
+          home_address?: string
           id?: string
           id_number?: string
           monthly_income?: number
           network_borrower_id?: string | null
           notes?: string
+          other_address?: string
           phone?: string
           updated_at?: string
+          work_address?: string
         }
         Relationships: [
           {
@@ -802,6 +900,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_archive_announcement: {
+        Args: { _announcement_id: string }
+        Returns: undefined
+      }
+      admin_publish_announcement: {
+        Args: { _announcement_id: string }
+        Returns: number
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
