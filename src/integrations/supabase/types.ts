@@ -10,7 +10,7 @@ export type Database = {
   // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
-    PostgrestVersion: "14.5"
+    PostgrestVersion: "14.17"
   }
   public: {
     Tables: {
@@ -113,6 +113,42 @@ export type Database = {
           },
         ]
       }
+      announcement_recipients: {
+        Row: {
+          announcement_id: string
+          business_id: string
+          created_at: string
+          read_at: string | null
+        }
+        Insert: {
+          announcement_id: string
+          business_id: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Update: {
+          announcement_id?: string
+          business_id?: string
+          created_at?: string
+          read_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "announcement_recipients_announcement_id_fkey"
+            columns: ["announcement_id"]
+            isOneToOne: false
+            referencedRelation: "announcements"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "announcement_recipients_business_id_fkey"
+            columns: ["business_id"]
+            isOneToOne: false
+            referencedRelation: "businesses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       announcements: {
         Row: {
           archived_at: string | null
@@ -160,42 +196,6 @@ export type Database = {
           {
             foreignKeyName: "announcements_target_business_id_fkey"
             columns: ["target_business_id"]
-            isOneToOne: false
-            referencedRelation: "businesses"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      announcement_recipients: {
-        Row: {
-          announcement_id: string
-          business_id: string
-          created_at: string
-          read_at: string | null
-        }
-        Insert: {
-          announcement_id: string
-          business_id: string
-          created_at?: string
-          read_at?: string | null
-        }
-        Update: {
-          announcement_id?: string
-          business_id?: string
-          created_at?: string
-          read_at?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "announcement_recipients_announcement_id_fkey"
-            columns: ["announcement_id"]
-            isOneToOne: false
-            referencedRelation: "announcements"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "announcement_recipients_business_id_fkey"
-            columns: ["business_id"]
             isOneToOne: false
             referencedRelation: "businesses"
             referencedColumns: ["id"]

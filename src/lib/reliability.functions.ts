@@ -2,12 +2,10 @@ import { createServerFn } from "@tanstack/react-start";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 import {
   rateReliability,
-  calculateReliabilityMetrics,
   LEVEL_EXPLANATION,
   NO_CONSENT_MESSAGE,
   NO_HISTORY_MESSAGE,
   NOT_PARTICIPATING_MESSAGE,
-  UNMATCHED_BORROWER_MESSAGE,
   type ReliabilityMetrics,
   type ReliabilityResult,
 } from "@/lib/reliability";
@@ -15,11 +13,10 @@ import {
 /** Maximum reliability checks a single business may run per rolling hour. */
 const HOURLY_SEARCH_LIMIT = 20;
 
+const round2 = (n: number) => Math.round((n + Number.EPSILON) * 100) / 100;
+
 function normalise(value: string | null | undefined): string {
-  return (value ?? "")
-    .trim()
-    .toLowerCase()
-    .replace(/[\s()-]/g, "");
+  return (value ?? "").trim().toLowerCase().replace(/[\s()-]/g, "");
 }
 
 /**
@@ -54,41 +51,6 @@ async function borrowerFingerprint(borrower: {
   return null;
 }
 
-function consentOperationFailure(operation: string, error: unknown): Error {
-  const message = error instanceof Error ? error.message : "";
-  const missingVariables = message.match(
-    /Missing Supabase environment variable\(s\): ([A-Z_, ]+)/i,
-  )?.[1];
-  if (missingVariables) {
-    console.error("[Reliability] Consent server configuration is incomplete", {
-      operation,
-      variables: missingVariables.split(", ").map((name) => name.trim()),
-    });
-    return new Error(
-      `Consent could not be recorded: server configuration is missing ${missingVariables}.`,
-    );
-  }
-
-  const code =
-    typeof error === "object" && error !== null && "code" in error && typeof error.code === "string"
-      ? error.code
-      : undefined;
-  console.error("[Reliability] Consent persistence failed", { operation, code: code ?? "unknown" });
-  return new Error(
-    `Consent could not be recorded while ${operation}${code ? ` (Supabase error ${code})` : ""}.`,
-  );
-}
-
-async function getConsentAdminClient() {
-  try {
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    void supabaseAdmin.auth;
-    return supabaseAdmin;
-  } catch (error) {
-    throw consentOperationFailure("initializing the secure database client", error);
-  }
-}
-
 /** Records / updates the data-sharing consent for one of the caller's own borrowers. */
 export const recordBorrowerConsent = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
@@ -107,16 +69,8 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
       .select("id, business_id, id_number, phone, email, network_borrower_id")
       .eq("id", data.borrowerId)
       .maybeSingle();
-    if (error) throw consentOperationFailure("loading the selected borrower", error);
+    if (error) throw new Error(error.message);
     if (!borrower) throw new Error("Borrower not found.");
-    const { data: isActiveMember, error: membershipError } = await supabase.rpc(
-      "is_active_business_member",
-      { _business_id: borrower.business_id },
-    );
-    if (membershipError)
-      throw consentOperationFailure("verifying active business membership", membershipError);
-    if (!isActiveMember)
-      throw new Error("Only an active member of this borrower's business can record consent.");
 
     let networkBorrowerId = borrower.network_borrower_id as string | null;
 
@@ -127,27 +81,33 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
           "Add an identity number, phone number or email to this borrower before recording consent.",
         );
       }
-      const supabaseAdmin = await getConsentAdminClient();
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
       const existing = await supabaseAdmin
         .from("network_borrowers")
-        .upsert({ identifier_hash: hash }, { onConflict: "identifier_hash" })
         .select("id")
-        .single();
-      if (existing.error)
-        throw consentOperationFailure("creating the shared borrower identity", existing.error);
-      networkBorrowerId = existing.data.id;
+        .eq("identifier_hash", hash)
+        .maybeSingle();
+      if (existing.error) throw new Error(existing.error.message);
+      if (existing.data) {
+        networkBorrowerId = existing.data.id;
+      } else {
+        const created = await supabaseAdmin
+          .from("network_borrowers")
+          .insert({ identifier_hash: hash })
+          .select("id")
+          .single();
+        if (created.error) throw new Error(created.error.message);
+        networkBorrowerId = created.data.id;
+      }
       const linked = await supabaseAdmin
         .from("borrowers")
         .update({ network_borrower_id: networkBorrowerId })
-        .eq("id", borrower.id)
-        .eq("business_id", borrower.business_id);
-      if (linked.error)
-        throw consentOperationFailure("linking the borrower to the shared identity", linked.error);
+        .eq("id", borrower.id);
+      if (linked.error) throw new Error(linked.error.message);
     }
 
     const now = new Date().toISOString();
-    const supabaseAdmin = await getConsentAdminClient();
-    const { error: upsertError } = await supabaseAdmin.from("borrower_consents").upsert(
+    const { error: upsertError } = await supabase.from("borrower_consents").upsert(
       {
         business_id: borrower.business_id,
         borrower_id: borrower.id,
@@ -160,7 +120,7 @@ export const recordBorrowerConsent = createServerFn({ method: "POST" })
       },
       { onConflict: "borrower_id" },
     );
-    if (upsertError) throw consentOperationFailure("saving the consent record", upsertError);
+    if (upsertError) throw new Error(upsertError.message);
 
     return { ok: true, status: data.status };
   });
@@ -187,15 +147,6 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       .maybeSingle();
     if (error) throw new Error(error.message);
     if (!borrower) throw new Error("Borrower not found.");
-    const { data: isActiveMember, error: membershipError } = await supabase.rpc(
-      "is_active_business_member",
-      { _business_id: borrower.business_id },
-    );
-    if (membershipError) throw new Error(membershipError.message);
-    if (!isActiveMember)
-      throw new Error(
-        "Only an active member of this borrower's business can run a reliability check.",
-      );
 
     const { data: business, error: bizError } = await supabase
       .from("businesses")
@@ -212,69 +163,12 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       };
     }
 
-    const { data: consent, error: consentError } = await supabase
+    const { data: consent } = await supabase
       .from("borrower_consents")
-      .select("business_id, network_borrower_id, status")
+      .select("status")
       .eq("borrower_id", borrower.id)
-      .eq("business_id", borrower.business_id)
       .maybeSingle();
-    if (consentError) throw new Error(consentError.message);
     if (consent?.status !== "granted") {
-      return {
-        status: "consent_unavailable",
-        level: null,
-        metrics: null,
-        explanation: NO_CONSENT_MESSAGE,
-      };
-    }
-
-    const hash = await borrowerFingerprint(borrower);
-    if (!hash) {
-      return {
-        status: "unmatched",
-        level: null,
-        metrics: null,
-        explanation: UNMATCHED_BORROWER_MESSAGE,
-      };
-    }
-
-    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
-    let networkId = borrower.network_borrower_id as string | null;
-    if (networkId) {
-      const { data: identity, error: identityError } = await supabaseAdmin
-        .from("network_borrowers")
-        .select("id, identifier_hash")
-        .eq("id", networkId)
-        .maybeSingle();
-      if (identityError) throw new Error(identityError.message);
-      if (!identity || identity.identifier_hash !== hash) {
-        return {
-          status: "unmatched",
-          level: null,
-          metrics: null,
-          explanation: UNMATCHED_BORROWER_MESSAGE,
-        };
-      }
-    } else {
-      const { data: identity, error: identityError } = await supabaseAdmin
-        .from("network_borrowers")
-        .select("id")
-        .eq("identifier_hash", hash)
-        .maybeSingle();
-      if (identityError) throw new Error(identityError.message);
-      networkId = identity?.id ?? null;
-    }
-
-    if (!networkId) {
-      return {
-        status: "unmatched",
-        level: null,
-        metrics: null,
-        explanation: UNMATCHED_BORROWER_MESSAGE,
-      };
-    }
-
-    if (consent.network_borrower_id !== networkId) {
       return {
         status: "consent_unavailable",
         level: null,
@@ -285,26 +179,42 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
 
     // Rate limiting — protects the network from mass scraping.
     const since = new Date(Date.now() - 60 * 60 * 1000).toISOString();
-    const { count, error: searchCountError } = await supabase
+    const { count } = await supabase
       .from("reliability_searches")
       .select("id", { count: "exact", head: true })
       .eq("business_id", borrower.business_id)
       .gte("created_at", since);
-    if (searchCountError) throw new Error(searchCountError.message);
     if ((count ?? 0) >= HOURLY_SEARCH_LIMIT) {
       throw new Error("Search limit reached. Please try again later.");
     }
 
+    const hash = await borrowerFingerprint(borrower);
+    const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+
+    let networkId = borrower.network_borrower_id as string | null;
+    if (!networkId && hash) {
+      const found = await supabaseAdmin
+        .from("network_borrowers")
+        .select("id")
+        .eq("identifier_hash", hash)
+        .maybeSingle();
+      networkId = found.data?.id ?? null;
+    }
+
     const logSearch = async (resultType: string) => {
-      const { error: logError } = await supabaseAdmin.from("reliability_searches").insert({
+      await supabaseAdmin.from("reliability_searches").insert({
         business_id: borrower.business_id,
         user_id: userId,
         network_borrower_id: networkId,
         purpose: "loan_assessment",
         result_type: resultType,
       });
-      if (logError) throw new Error(logError.message);
     };
+
+    if (!networkId) {
+      await logSearch("no_history");
+      return { status: "no_history", level: null, metrics: null, explanation: NO_HISTORY_MESSAGE };
+    }
 
     // Only borrower records from participating businesses with granted consent.
     const { data: peers, error: peerError } = await supabaseAdmin
@@ -314,27 +224,18 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
       .eq("businesses.reliability_network_enabled", true);
     if (peerError) throw new Error(peerError.message);
 
-    const peerBusinessById = new Map((peers ?? []).map((peer) => [peer.id, peer.business_id]));
-    if (peerBusinessById.size === 0) {
-      await logSearch("unmatched");
-      return {
-        status: "unmatched",
-        level: null,
-        metrics: null,
-        explanation: UNMATCHED_BORROWER_MESSAGE,
-      };
+    const peerIds = (peers ?? []).map((p) => p.id);
+    if (peerIds.length === 0) {
+      await logSearch("no_history");
+      return { status: "no_history", level: null, metrics: null, explanation: NO_HISTORY_MESSAGE };
     }
 
-    const { data: consents, error: peerConsentError } = await supabaseAdmin
+    const { data: consents } = await supabaseAdmin
       .from("borrower_consents")
-      .select("borrower_id, business_id, network_borrower_id, status")
-      .in("borrower_id", [...peerBusinessById.keys()])
-      .eq("network_borrower_id", networkId)
+      .select("borrower_id, status")
+      .in("borrower_id", peerIds)
       .eq("status", "granted");
-    if (peerConsentError) throw new Error(peerConsentError.message);
-    const consentedIds = (consents ?? [])
-      .filter((consent) => peerBusinessById.get(consent.borrower_id) === consent.business_id)
-      .map((consent) => consent.borrower_id);
+    const consentedIds = (consents ?? []).map((c) => c.borrower_id);
     if (consentedIds.length === 0) {
       await logSearch("consent_unavailable");
       return {
@@ -347,41 +248,63 @@ export const checkBorrowerReliability = createServerFn({ method: "POST" })
 
     const { data: loans, error: loanError } = await supabaseAdmin
       .from("loans")
-      .select("id, borrower_id, business_id, total_repayable, due_date, status")
+      .select("id, total_repayable, due_date, status")
       .in("borrower_id", consentedIds);
     if (loanError) throw new Error(loanError.message);
 
-    const consentedBusinessById = new Map(
-      (consents ?? [])
-        .filter((consent) => consentedIds.includes(consent.borrower_id))
-        .map((consent) => [consent.borrower_id, consent.business_id]),
-    );
-    const relevant = (loans ?? []).filter(
-      (loan) =>
-        loan.status !== "cancelled" &&
-        consentedBusinessById.get(loan.borrower_id) === loan.business_id,
-    );
+    const relevant = (loans ?? []).filter((l) => l.status !== "cancelled");
     if (relevant.length === 0) {
       await logSearch("no_history");
       return { status: "no_history", level: null, metrics: null, explanation: NO_HISTORY_MESSAGE };
     }
 
-    const loanIds = relevant.map((loan) => loan.id);
-    const [paymentsResult, repaymentsResult] = await Promise.all([
-      supabaseAdmin.from("payments").select("loan_id, amount, payment_date").in("loan_id", loanIds),
-      supabaseAdmin
-        .from("loan_repayments")
-        .select("loan_id, installment_number, due_date, amount_due")
-        .in("loan_id", loanIds),
-    ]);
-    if (paymentsResult.error) throw new Error(paymentsResult.error.message);
-    if (repaymentsResult.error) throw new Error(repaymentsResult.error.message);
+    const { data: payments, error: payError } = await supabaseAdmin
+      .from("payments")
+      .select("loan_id, amount, payment_date")
+      .in(
+        "loan_id",
+        relevant.map((l) => l.id),
+      );
+    if (payError) throw new Error(payError.message);
 
-    const metrics: ReliabilityMetrics = calculateReliabilityMetrics({
-      loans: relevant,
-      payments: paymentsResult.data ?? [],
-      repayments: repaymentsResult.data ?? [],
-    });
+    const paidByLoan = new Map<string, { total: number; last: string }>();
+    for (const p of payments ?? []) {
+      const current = paidByLoan.get(p.loan_id) ?? { total: 0, last: "" };
+      current.total = round2(current.total + Number(p.amount));
+      if (p.payment_date > current.last) current.last = p.payment_date;
+      paidByLoan.set(p.loan_id, current);
+    }
+
+    const today = new Date().toISOString().slice(0, 10);
+    let paidOnTime = 0;
+    let paidLate = 0;
+    let active = 0;
+    let overdue = 0;
+
+    for (const loan of relevant) {
+      const paid = paidByLoan.get(loan.id) ?? { total: 0, last: "" };
+      const outstanding = round2(Number(loan.total_repayable) - paid.total);
+      const settled = loan.status === "completed" || outstanding <= 0;
+      if (settled) {
+        const finalDate = paid.last || loan.due_date;
+        if (finalDate && loan.due_date && finalDate > loan.due_date) paidLate += 1;
+        else paidOnTime += 1;
+      } else if (loan.due_date && today > loan.due_date) {
+        overdue += 1;
+      } else {
+        active += 1;
+      }
+    }
+
+    const completedLoans = paidOnTime + paidLate;
+    const metrics: ReliabilityMetrics = {
+      completedLoans,
+      paidOnTime,
+      paidLate,
+      activeObligations: active,
+      overdueObligations: overdue,
+      onTimeRate: completedLoans === 0 ? 0 : Math.round((paidOnTime / completedLoans) * 1000) / 10,
+    };
 
     const level = rateReliability(metrics);
     await logSearch("history_available");

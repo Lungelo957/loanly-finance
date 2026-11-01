@@ -1,5 +1,5 @@
-import { useEffect, useMemo, useState } from "react";
-import { createFileRoute, Link, Outlet, useRouterState } from "@tanstack/react-router";
+import { useMemo, useState } from "react";
+import { createFileRoute } from "@tanstack/react-router";
 import { useMutation } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Pencil, Plus, Search, Trash2, Users } from "lucide-react";
@@ -26,9 +26,6 @@ import { friendlyError, useBorrowers, useBusinessInvalidate, type Borrower } fro
 import { formatCurrency, formatDate } from "@/lib/format";
 
 export const Route = createFileRoute("/business/_app/borrowers")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    edit: typeof search.edit === "string" ? search.edit : undefined,
-  }),
   head: () => ({
     meta: [
       { title: "Borrowers — CashFlow" },
@@ -46,9 +43,7 @@ const blank = {
   full_name: "",
   phone: "",
   email: "",
-  home_address: "",
-  work_address: "",
-  other_address: "",
+  address: "",
   id_number: "",
   employment: "",
   monthly_income: "",
@@ -56,15 +51,10 @@ const blank = {
 };
 
 function BorrowersPage() {
-  const isNestedRoute = useRouterState({
-    select: (state) => state.location.pathname !== "/business/borrowers",
-  });
   const { data: account } = useAccount();
   const businessId = account?.business?.id;
   const invalidate = useBusinessInvalidate(businessId);
   const borrowers = useBorrowers(businessId);
-  const searchParams = Route.useSearch();
-  const navigate = Route.useNavigate();
 
   const [search, setSearch] = useState("");
   const [open, setOpen] = useState(false);
@@ -87,9 +77,7 @@ function BorrowersPage() {
       full_name: b.full_name,
       phone: b.phone,
       email: b.email,
-      home_address: b.home_address || b.address,
-      work_address: b.work_address,
-      other_address: b.other_address,
+      address: b.address,
       id_number: b.id_number,
       employment: b.employment,
       monthly_income: String(b.monthly_income ?? ""),
@@ -97,13 +85,6 @@ function BorrowersPage() {
     });
     setOpen(true);
   }
-
-  useEffect(() => {
-    if (!searchParams.edit || !borrowers.data) return;
-    const borrower = borrowers.data.find((b) => b.id === searchParams.edit);
-    if (borrower) openEdit(borrower);
-    void navigate({ search: (previous) => ({ ...previous, edit: undefined }), replace: true });
-  }, [borrowers.data, navigate, searchParams.edit]);
 
   const save = useMutation({
     mutationFn: async () => {
@@ -117,10 +98,7 @@ function BorrowersPage() {
         full_name: form.full_name.trim(),
         phone: form.phone.trim(),
         email: form.email.trim(),
-        address: form.home_address.trim(),
-        home_address: form.home_address.trim(),
-        work_address: form.work_address.trim(),
-        other_address: form.other_address.trim(),
+        address: form.address.trim(),
         id_number: form.id_number.trim(),
         employment: form.employment.trim(),
         monthly_income: income,
@@ -190,8 +168,6 @@ function BorrowersPage() {
     );
   }, [borrowers.data, search]);
 
-  if (isNestedRoute) return <Outlet />;
-
   return (
     <div>
       <PageHeader
@@ -241,13 +217,7 @@ function BorrowersPage() {
             <div key={b.id} className="card-surface p-4">
               <div className="flex items-start justify-between gap-2">
                 <div className="min-w-0">
-                  <Link
-                    to="/business/borrowers/$borrowerId"
-                    params={{ borrowerId: b.id }}
-                    className="block truncate font-semibold hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
-                  >
-                    {b.full_name}
-                  </Link>
+                  <p className="truncate font-semibold">{b.full_name}</p>
                   <p className="truncate text-sm text-muted-foreground">{b.phone || b.email || "No contact"}</p>
                 </div>
                 <div className="flex gap-1">
@@ -262,9 +232,6 @@ function BorrowersPage() {
               <dl className="mt-3 space-y-1 text-xs text-muted-foreground">
                 {b.id_number ? <div>ID: {b.id_number}</div> : null}
                 {b.employment ? <div>Work: {b.employment}</div> : null}
-                {b.home_address ? <div className="break-words"><span className="font-medium text-foreground">Home address:</span> {b.home_address}</div> : null}
-                {b.work_address ? <div className="break-words"><span className="font-medium text-foreground">Work address:</span> {b.work_address}</div> : null}
-                {b.other_address ? <div className="break-words"><span className="font-medium text-foreground">Other / Rental address:</span> {b.other_address}</div> : null}
                 <div>Income: {formatCurrency(Number(b.monthly_income))}/month</div>
                 <div>Added {formatDate(b.created_at)}</div>
               </dl>
@@ -299,19 +266,9 @@ function BorrowersPage() {
                 <Input id="b_email" type="email" value={form.email} onChange={set("email")} />
               </div>
             </div>
-            <div className="grid gap-4 sm:grid-cols-2">
-              <div className="space-y-2">
-                <Label htmlFor="home_address">Home address</Label>
-                <Input id="home_address" value={form.home_address} onChange={set("home_address")} />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="work_address">Work address</Label>
-                <Input id="work_address" value={form.work_address} onChange={set("work_address")} />
-              </div>
-              <div className="space-y-2 sm:col-span-2">
-                <Label htmlFor="other_address">Other / Rental address</Label>
-                <Input id="other_address" value={form.other_address} onChange={set("other_address")} />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <Input id="address" value={form.address} onChange={set("address")} />
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
               <div className="space-y-2">
